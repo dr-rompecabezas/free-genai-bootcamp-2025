@@ -1,2 +1,3 @@
-# gen-ai-bootcamp-2025
-GenAI Bootcamp 2025
+# GenAI Bootcamp 2025
+
+Repo for ExamPro's free GenAI Bootcamp.
