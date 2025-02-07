@@ -96,3 +96,86 @@ The 4o model's response was friendly, supportive, and provided excellent pedagog
 The o1 model's response was concise, precise, and pedagogically valuable. The model's tone was professional and supportive, and the feedback was clear and helpful. The model's response was in line with the prompt's requirements and demonstrated an understanding of the intended meaning of the sentence. The model's response was more cerebral and less playful than the 4o model's response, which could be seen as a positive or negative depending on the student's preferences and the organization's requirements.
 
 A more polished prompt could be used to evaluate the models further, but the initial results are promising.
+
+#### English (advanced level)
+
+For the English test, ChatGPT's o1 and 4o models were used to generate a noun and a list of adjectives that describe the noun meaningfully and harmoniously. The model was asked specific adjectives categories and required to scramble the adjectives. This provided a challenging task for a highly proficient English speaker who is nonetheless a non-native speaker. It has been observed that while native speakers might naturally know the correct order of adjectives, non-native speakers might struggle with this task even at an advanced level. The tester meets this criterion and will attempt to create a sentence using the output from ChatGPT in a simple text editor without autocompletion or any other assistive writing technology. The rest of the experiment will be conducted per the initial prompt.
+
+Noun: Akiya (An abandoned or vacant house in Japan)
+
+Adjectives (scrambled and each from a different type):
+
+- Wooden (Material)
+- Faded (Color)
+- Neglected (Opinion)
+- Century-old (Age)
+- Few (Quantity)
+- Japanese (Origin)
+- Gabled (Shape)
+- Modest (Size)
+- Rural (Type)
+- Weathered (Physical Quality)
+
+Sentence used: "Wouldn’t it be lovely to restore a single century-old neglected modest weathered gabled wooden rural faded Japanese akiya to its former glory?"
+
+##### 4o model (English)
+
+First attempt: The model did not point out any errors in the sequence of adjectives and instead suggested breaking up the sentence due to its length. While this is a valid suggestion, it did not address the student's main concern, which was never stated explicitly.
+
+Second attempt: The model found the sentence to be "already well-constructed and grammatically correct", and added that it "effectively conveys a poetic and nostalgic feeling." However, the response continued, "the string of adjectives before 'akiya' is quite long, which can make the sentence feel a bit heavy." A possible improvement, according to the model, was to place a certain adjective before another one to make it flow more naturally. The model also suggested breaking up the sentence into two or more sentences or using punctation such as an em dash to improve it. While these are all valid suggestions, the model does not seem to have picked on the grammar rule that dictates the order of adjectives in English. Given this feedback, the student would have a hard time inferring the correct order of adjectives.
+
+The model was then prompted to provide feedback on the correct order of adjectives, which it provided:
+
+```text
+1. Quantity → 2. Opinion → 3. Size → 4. Age → 5. Shape → 6. Color → 7. Origin → 8. Material → 9. Type/Purpose → Noun
+```
+
+The sentence included a determiner and 10 adjectives. The model's feedback was helpful and informative, but it was not provided in the initial response, which would have been more pedagogically valuable. It was also missing the "Physical Quality" category.
+
+For comparison, here's the list that was originally used to generate the scrambled adjectives, which differs only slightly from the model's feedback.
+
+1. Determiner: Words like a, the, my, some.
+2. Quantity: Numbers or amounts like two, several.
+3. Opinion: Descriptive words like beautiful, boring.
+4. Size: Words indicating size like small, large.
+5. Physical Quality: Descriptions of physical features like smooth, rough.
+6. Shape: Forms like round, square.
+7. Age: Descriptions of age like old, new.
+8. Color: Colors like red, blue.
+9. Origin: The place of origin like American, Chinese.
+10. Material: What something is made of like wooden, metal.
+11. Type: Categories like general-purpose, emergency.
+
+[Source](https://englishstudyonline.org/order-of-adjectives/)
+
+Further research and a reliable expert source would be needed to verify the accuracy of the list. However, for the purpose of this experiment, the conclusion is that the model's feedback was not as helpful as in the Portuguese and French tests.
+
+Finally, the model suggested the following correction, along with a lengthy explanation, further ignoring the original instruction to not provide the correct sentence:
+
+```text
+Wouldn’t it be lovely to restore a single modest, neglected, weathered, century-old, faded, gabled, wooden, rural Japanese akiya to its former glory?
+```
+
+##### o1 model (English)
+
+Single attempt: Consistent with previously observed behaviour, the o1 model responded concisely:
+
+```text
+That sentence is grammatically correct, and I can clearly see what you mean. One small improvement you could consider is to make the long string of adjectives a bit easier to read (for instance, by adding commas or changing their order). This can help the sentence flow more smoothly. Otherwise, you’ve got a solid sentence!
+```
+
+However, the model did not provide feedback on the order of adjectives, which was the main focus of the test. The model was then prompted to provide feedback on the correct order of adjectives. On this task, it performed much better than the 4o model. First, it provided a similar list to the 4o model with the order of 9 types of adjectives, but then it observed the guidance to not provide the correct sentence and instead provided a hint to the student to consider the categories of adjectives and their order. This was a more pedagogically valuable response than the 4o model's response.
+
+```text
+When you have many adjectives describing one noun, you can also add commas or use “and” to make the sentence easier to read. Here’s a hint for your sentence: try placing the more subjective or general adjectives first, then move on to details like age, condition, shape, material, and finally the origin or location. Feel free to experiment with where “neglected,” “weathered,” and “faded” go—they often fit near the beginning (condition) or close to color/appearance.
+```
+
+It is interesting to note that the o1 model did not comment on the "poetic" and "nostalgic" intent of the sentence, as the 4o model did. Once again, the o1 model's response was more professional and less playful than the 4o model's response. The o1 model's response was more concise and to the point, which could be seen as a positive or negative depending on the student's preferences and the organization's requirements.
+
+### Conclusion (English)
+
+The 4o model's response provided limited pedagogical value.
+
+The o1 model's response was more pedagogically valuable than the 4o model's response but still required a follow-up prompt to provide the correct order of adjectives.
+
+This particular task would have required a more elaborate prompt that specifcally focused on the order of adjectives in English. The initial results are promising, but further testing is needed to evaluate the models' performance on more complex tasks.
