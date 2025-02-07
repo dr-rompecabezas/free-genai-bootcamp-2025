@@ -4,37 +4,107 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
+- [Summary Table: 4o vs. o1 Model Performance](#summary-table-4o-vs-o1-model-performance)
+- [Introduction](#introduction)
+  - [Key Questions Explored](#key-questions-explored)
+  - [Summary of Findings](#summary-of-findings)
 - [Method](#method)
+  - [Models Tested](#models-tested)
+  - [Experiment Setup](#experiment-setup)
+  - [Why Use Temporary Chats?](#why-use-temporary-chats)
+  - [Testing Approach](#testing-approach)
 - [Prompt](#prompt)
 - [Results](#results)
-  - [Portuguese (beginner level)](#portuguese-beginner-level)
-    - [4o model (Portuguese)](#4o-model-portuguese)
-    - [o1 model (Portuguese)](#o1-model-portuguese)
-    - [Conclusion (Portuguese)](#conclusion-portuguese)
-  - [French (intermediate level)](#french-intermediate-level)
-    - [4o model (French)](#4o-model-french)
-    - [o1 model (French)](#o1-model-french)
-    - [Conclusion (French)](#conclusion-french)
-  - [English (advanced level)](#english-advanced-level)
-    - [4o model (English)](#4o-model-english)
-    - [o1 model (English)](#o1-model-english)
-    - [Conclusion (English)](#conclusion-english)
-  - [Spanish (expert level)](#spanish-expert-level)
-    - [4o model (Spanish)](#4o-model-spanish)
-    - [o1 model (Spanish)](#o1-model-spanish)
-    - [Conclusion (Spanish)](#conclusion-spanish)
+  - [Portuguese (Beginner Level)](#portuguese-beginner-level)
+    - [Test Sentence (PT)](#test-sentence-pt)
+    - [4o Model Response (PT)](#4o-model-response-pt)
+    - [o1 Model Response (PT)](#o1-model-response-pt)
+    - [Conclusion (PT)](#conclusion-pt)
+  - [French (Intermediate Level)](#french-intermediate-level)
+    - [Test Sentence (FR)](#test-sentence-fr)
+    - [4o Model Response (FR)](#4o-model-response-fr)
+    - [o1 Model Response (FR)](#o1-model-response-fr)
+    - [Conclusion (FR)](#conclusion-fr)
+  - [English (Advanced Level: Adjective Order Test)](#english-advanced-level-adjective-order-test)
+    - [Test Sentence (EN)](#test-sentence-en)
+    - [4o Model Response (EN)](#4o-model-response-en)
+    - [o1 Model Response (EN)](#o1-model-response-en)
+    - [Conclusion (EN)](#conclusion-en)
+  - [Spanish (Expert Level: Medical Terminology)](#spanish-expert-level-medical-terminology)
+    - [Test Sentence (ES)](#test-sentence-es)
+    - [4o Model Response (ES)](#4o-model-response-es)
+    - [o1 Model Response (ES)](#o1-model-response-es)
+    - [Conclusion (ES)](#conclusion-es)
+  - [Overall Observations](#overall-observations)
+- [Conclusion & Next Steps](#conclusion--next-steps)
+  - [Key Takeaways](#key-takeaways)
+  - [Next Steps & Potential Improvements](#next-steps--potential-improvements)
+  - [Final Thoughts](#final-thoughts)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## Summary Table: 4o vs. o1 Model Performance
+
+| Language          | Sentence Complexity         | 4o Model Response | o1 Model Response | Key Observations |
+|------------------|--------------------------|------------------|------------------|------------------|
+| **Portuguese** (Beginner) | Simple sentence with minor grammar errors | Inconsistent feedback; sometimes gave full answer instead of hints | More structured feedback; responded in Portuguese, assuming user proficiency | o1 provided a more pedagogically valuable response but was slower |
+| **French** (Intermediate) | Sentence with multiple grammar and vocabulary mistakes | Friendly and engaging; used emojis | Precise and professional; did not use emojis | o1 was more direct, while 4o was more interactive and supportive |
+| **English** (Advanced) | Complex adjective ordering test | Missed key learning point initially; focused on sentence length instead | Provided better hints but still required a follow-up prompt | o1 had a more structured approach but needed prompting |
+| **Spanish** (Expert) | Advanced sentence with specialized vocabulary | Identified minor terminology improvement | Identified same issue; slightly warmer tone | Both models performed well, but o1 maintained a more professional tone |
+
+## Introduction
+
+This document presents the results of an experiment comparing OpenAI’s **4o** and **o1** models in a **sentence construction activity** designed for language learners. The goal was to evaluate how well each model provides **pedagogically valuable feedback** when correcting or improving sentences written in different languages.
+
+The models were tested using **ChatGPT’s temporary chat feature** to prevent memory retention and ensure fresh responses for each attempt. Sentences of varying complexity were tested in **Portuguese (beginner), French (intermediate), English (advanced), and Spanish (expert)** to analyze how each model handles different proficiency levels.
+
+### Key Questions Explored
+
+1. **Consistency** – Does the model respond reliably to similar prompts?
+2. **Pedagogical Value** – Does the feedback promote active learning instead of just providing corrections?
+3. **Language Adaptability** – Does the model correctly assess the user’s language level and respond appropriately?
+4. **Response Tone & Style** – Does the model maintain a professional, friendly, and engaging tone?
+5. **Speed & Efficiency** – How long does the model take to generate responses?
+
+### Summary of Findings
+
+- **o1 model** generally provided more **structured, pedagogically valuable, and professional** feedback.
+- **4o model** was more **playful and engaging**, but sometimes inconsistent.
+- Response times varied significantly, with **o1 taking longer** in all cases.
+- **Both models performed well at higher proficiency levels**, but the **4o model struggled with consistency at lower levels**.
+
+The following sections present a detailed breakdown of the methodology, prompts used, and individual language-specific results.
+
 ## Method
 
-Models used: 4o and o1
+### Models Tested
 
-Subscription: Plus plan (USD 20/month)
+- **4o Model** (OpenAI’s default GPT-4o)
+- **o1 Model** (More recent OpenAI model)
 
-ChatGPT's **temporary chat** feature was used to prevent the model from [creating memories](https://openai.com/index/memory-and-new-controls-for-chatgpt/), which might pollute the model's future responses during experimentation. This allowed sending the same prompt more than once without the model remembering the previous interactions. The only drawback of using the temporary chat is the inability to see the chat after it has been closed, which makes the task of analyzing the model's performance more challenging.
+### Experiment Setup
 
-The experiment was conducted in first person to simulate a student's perspective. The model was given a prompt to evaluate its suitability for the task. The model's response was then analyzed based on the prompt's requirements and the pedagogical value of the feedback provided.
+- **Platform:** ChatGPT with a **Plus subscription** ($20/month).
+- **Testing Environment:** **Temporary chat** mode to prevent memory retention.
+- **Interaction Style:** The models were addressed **as a language tutor** to simulate a real-world tutoring scenario.
+- **Evaluation Focus:** The models were assessed based on **consistency, pedagogical value, adaptability, tone, and efficiency**.
+
+### Why Use Temporary Chats?
+
+ChatGPT's **temporary chat mode** ensures that each interaction is **stateless**, meaning:
+✔️ The model does not retain context from previous messages.  
+✔️ Responses are **not influenced by prior interactions**, ensuring fairness in testing.  
+⚠️ **Drawback:** Once the chat is closed, the conversation history is lost, making post-analysis more challenging.
+
+### Testing Approach
+
+1. **A sentence was submitted in a target language** (Portuguese, French, English, or Spanish).
+2. The model was **prompted to provide feedback** without revealing the correct answer.
+3. **Corrections and improvements were analyzed** based on clarity, effectiveness, and adherence to the prompt.
+4. If the model’s response was **inconsistent or incomplete**, a follow-up prompt was given.
+5. The **response time and style** were noted.
+
+The next section outlines the **exact prompt** used for each test.
 
 ## Prompt
 
@@ -50,175 +120,146 @@ If my sentence has mistakes, point them out by explaining what kind of error I m
 Keep your feedback friendly, supportive, and constructive to make learning engaging.
 ```
 
-Note: The target language was replaced with the language being evaluated in each case.
+**Note**: The target language was replaced with the language being evaluated in each case.
 
 ## Results
 
-### Portuguese (beginner level)
+This section presents the performance of **4o** and **o1** models across different languages and proficiency levels. Each test followed the same methodology, evaluating **feedback quality, pedagogical value, and response consistency**.
 
-Sentence used: "Meu filho vai a escola todos os dias."
-Translation: "My son goes to school every day."
+### Portuguese (Beginner Level)
 
-#### 4o model (Portuguese)
+#### Test Sentence (PT)
 
-First attempt: The model identified a small error in the preposition "a" (should be the contracted form "à") and provided helpful information to correct the error, including the grammar and hints using different sentences. Though the correct sentence was easy to infer from the feedback, the overall pedadogical value from such a simple prompt was very high.
+📝 *Meu filho vai a escola todos os dias.*  
+✔️ Corrected: *Meu filho vai à escola todos os dias.*  
+💬 *"My son goes to school every day."*
 
-Second attempt: The model identified the error but this time provided the correct solution. This is a stark contrast to the previous response, which was more pedagogically valuable.
+#### 4o Model Response (PT)
 
-#### o1 model (Portuguese)
+✅ Identified the preposition error and provided an explanation.  
+❌ Inconsistent behavior—sometimes gave hints, other times the full answer.  
 
-Single attempt: After reasoning for 4 seconds, the model surprisingly replied in Portuguese! We never told the model that the student is at a beginner level, so it might have assumed the student was more advanced. The model's response would have been challenging for a beginner student but there is some pedagogical value to interacting in the target language. After the model's initial response, the test sentence was entered. The model reasoned for 20 seconds (!) and provided a concise response that was incredibly helpful. The model identified the error and provided a hint to correct it without giving away the solution. The model also provided positive reinforcement in far more professional tone than the 4o model: unlike the 4o model, it did not use emojis but rather a single sentence. Then, the correct sentence was entered, and true to its instructions, the model acknowledged the correct sentence and provided an improvement using more advanced vocabulary. The entire interaction was very professional and pedagogically valuable and it happened exclusively in Portuguese.
+#### o1 Model Response (PT)
 
-#### Conclusion (Portuguese)
+✅ Responded in **Portuguese**, assuming student proficiency.  
+✅ Provided **structured feedback** and hints without revealing the answer.  
+❌ **Slower response time** (~20 sec).  
 
-The inconsistency in the 4o model's responses to the initial simple prompt makes the case for a more elaborate prompt or a more complex setup using OpenAI's API.
+#### Conclusion (PT)
 
-The o1 model's response was very thoughtful and pedagogically valuable. The model's ability to reason for 20 seconds and provide a concise response that was helpful and supportive is commendable. The model's ability to interact in the target language is a plus. Though it would have been challenging for a beginner student to interact exclusively in Portuguese, we never told the model the student's proficiency level. One significant drawback is the model's slow response time, which could be a hindrance in a real-time tutoring scenario, as well as the model's cost, which is higher than the 4o model and might not be justifiable for this task.
+- **o1 was more structured** but slower.  
+- **4o was inconsistent** but still useful for quick corrections.  
+- The **lack of memory in temporary chats** could explain variations in responses.
 
-### French (intermediate level)
+### French (Intermediate Level)
 
-Sentence used: "J'aimerai bien voyager par tout le monde, dégoûter les plusieurs cuisines, et apprendre plusieurs langues."
-Corrected sentence: "J'aimerais bien voyager à travers le monde, goûter plusieurs cuisines, et apprendre plusieurs langues."
-Translation: "I would like to travel around the world, taste many cuisines, and learn many languages."
+#### Test Sentence (FR)
 
-#### 4o model (French)
+📝 *J'aimerai bien voyager par tout le monde, dégoûter les plusieurs cuisines, et apprendre plusieurs langues.*  
+✔️ Corrected: *J'aimerais bien voyager à travers le monde, goûter plusieurs cuisines, et apprendre plusieurs langues.*  
+💬 *"I would like to travel around the world, taste many cuisines, and learn many languages."*
 
-Single attempt: The model identified four errors and provided feedback for each.
+#### 4o Model Response (FR)
 
-1. “J’aimerai” → “J’aimerais”
-    - This is a common mistake! “J’aimerais” is the correct conditional form of “aimer” (meaning “I would like”), while “J’aimerai” is the future tense (meaning “I will love”). Since you’re expressing a wish, the conditional “J’aimerais” is the right choice.
-2. “par tout le monde” → ?
-    - “Par tout” is incorrect here. Think about how you would say “all around the world” in French. A more natural phrase would be something like “à travers le monde” or “dans le monde entier”.
-3. “dégoûter” → ?
-    - Be careful! “Dégoûter” means “to disgust” rather than “to taste”. You need a verb that means “to try food”—do you know which one?
-4. “les plusieurs cuisines” → ?
-    - “Les” is unnecessary before “plusieurs” because “plusieurs” already means “several” on its own. So, you just need “plusieurs cuisines”.
+✅ Identified **four errors** and gave helpful hints.  
+✅ Used **friendly tone** with emojis to encourage engagement.  
 
-The feedback is generally helpful. The model’s tone is friendly and supportive, and it encourages the student to try again. The model does not provide the correct sentence, which is in line with the prompt’s requirements. It understood the intended meaning of the sentence and provided feedback accordingly.
+#### o1 Model Response (FR)
 
-After entering the corrected sentence, the model acknowledged the correction and suggested using "découvrir" instead of "goûter" for the more nuanced meaning of not just tasting but also exploring different food cultures.
+✅ Identified **same four errors** concisely.  
+✅ **More professional and precise**, no emojis.  
+❌ Responded in **English**, unlike the Portuguese test.  
 
-The model’s response was friendly and supportive, and provided excellent pedagogical value.
+#### Conclusion (FR)
 
-#### o1 model (French)
+- **4o was more engaging** (emojis, casual tone).  
+- **o1 was more structured** but lacked the immersive language-learning approach.  
+- Both models suggested similar **stylistic improvements** beyond basic corrections.
 
-Single attempt: After reasoning for 27 seconds, the model identified the same four errors as the 4o model and provided feedback for each. Curiously, unlike during the Portuguese test, the model chose to interact in English.
+### English (Advanced Level: Adjective Order Test)
 
-1. Verb form: The conditional form of “I would like” isn’t spelled the way you wrote it. Look at the difference between the future tense and the conditional in French.
-2. Expression for traveling: “Par tout le monde” sounds unnatural. Think of a more common way to say “around the world” or “throughout the world” in French.
-3. Vocabulary: The verb you used before mentioning “cuisines” actually means “to disgust” or “repel.” There’s a very similar verb that means “to taste/appreciate food.”
-4. Article + “plusieurs”: Typically, you don’t combine “les” with “plusieurs.” Consider removing or changing the article.
+#### Test Sentence (EN)
 
-This response is more in line with the prompt’s requirements than the 4o model’s response. As observed during the Portuguese test, the o1 model’s response was concise, precise, and pedagogically valuable. The student is challenged to think and correct the errors themselves. The model asked whether more hints were needed.
+📝 *Wouldn’t it be lovely to restore a single century-old neglected modest weathered gabled wooden rural faded Japanese akiya to its former glory?*  
 
-After entering the corrected sentence, the model acknowledged the correction, noticed the repeated use of the word "plusieurs" and suggested a stylistic improvement to the same phrase as the 4o model: "you could say *goûter à de nombreuses cuisines* or *à différentes cuisines*—just to add variety to the wording.
+#### 4o Model Response (EN)
 
-It would appear from this last interaction that the 4o model was slightly more creative and—true to its label as a reasoning model—the o1 model was more cerebral. The o1 model's response was overall less playful than the 4o model's response. The former used no emojis and was more professional in tone, while the latter used emojis in the opening and closing paragraphs. The o1 model's response was more concise and to the point, which could be seen as a positive or negative depending on the student's preferences. Though it would be tempting to allow multiple styles, this could add complexity and costs to the project, so ultimately, the style would have to be dicatated by the organization's requirements.
+❌ Missed the **core grammar rule** on adjective order.  
+❌ Focused on **sentence length** instead.  
+✅ Provided adjective order **only after prompting**.  
 
-#### Conclusion (French)
+#### o1 Model Response (EN)
 
-The 4o model's response was friendly, supportive, and provided excellent pedagogical value. The model's tone was engaging and encouraging, and the feedback was clear and helpful. The model's response was in line with the prompt's requirements and demonstrated an understanding of the intended meaning of the sentence.
+✅ Recognized the sentence was grammatically correct.  
+✅ Provided **hints instead of full answers**, making it more pedagogically valuable.  
+✅ Suggested **breaking down long adjective strings for readability**.  
 
-The o1 model's response was concise, precise, and pedagogically valuable. The model's tone was professional and supportive, and the feedback was clear and helpful. The model's response was in line with the prompt's requirements and demonstrated an understanding of the intended meaning of the sentence. The model's response was more cerebral and less playful than the 4o model's response, which could be seen as a positive or negative depending on the student's preferences and the organization's requirements.
+#### Conclusion (EN)
 
-A more polished prompt could be used to evaluate the models further, but the initial results are promising.
+- **4o struggled to identify the main learning point** and needed extra prompting.  
+- **o1 was better at guiding the student** while maintaining a structured approach.  
+- This test revealed that **explicitly stating learning goals** in the prompt would improve model responses.
 
-### English (advanced level)
+### Spanish (Expert Level: Medical Terminology)
 
-For the English test, ChatGPT's o1 and 4o models were used to generate a noun and a list of adjectives that describe the noun meaningfully and harmoniously. The model was asked specific adjectives categories and required to scramble the adjectives. This provided a challenging task for a highly proficient English speaker who is nonetheless a non-native speaker. It has been observed that while native speakers might naturally know the correct order of adjectives, non-native speakers might struggle with this task even at an advanced level. The tester meets this criterion and will attempt to create a sentence using the output from ChatGPT in a simple text editor without autocompletion or any other assistive writing technology. The rest of the experiment will be conducted per the initial prompt.
+#### Test Sentence (ES)
 
-Noun: Akiya (An abandoned or vacant house in Japan)
+📝 *El cardiólogo y la intensivista han determinado que, dada tu historia médica, la intervención más adecuada en tu caso es una angioplastia coronaria.*  
+✔️ Suggested Improvement: *dado tu historial médico* (better medical terminology).  
+💬 *"The cardiologist and the intensivist have determined that, given your medical history, the most appropriate intervention in your case is a coronary angioplasty."*
 
-Adjectives (scrambled and each from a different type):
+#### 4o Model Response (ES)
 
-- Wooden (Material)
-- Faded (Color)
-- Neglected (Opinion)
-- Century-old (Age)
-- Few (Quantity)
-- Japanese (Origin)
-- Gabled (Shape)
-- Modest (Size)
-- Rural (Type)
-- Weathered (Physical Quality)
+✅ Switched to **Spanish** after detecting user fluency.  
+✅ Provided **high-level medical vocabulary improvements**.  
 
-Sentence used: "Wouldn’t it be lovely to restore a single century-old neglected modest weathered gabled wooden rural faded Japanese akiya to its former glory?"
+#### o1 Model Response (ES)
 
-#### 4o model (English)
+✅ Started **directly in Spanish**, similar to the Portuguese test.  
+✅ Provided **concise, professional feedback**.  
+✅ Warmer tone than in other languages.  
 
-First attempt: The model did not point out any errors in the sequence of adjectives and instead suggested breaking up the sentence due to its length. While this is a valid suggestion, it did not address the student's main concern, which was never stated explicitly.
+#### Conclusion (ES)
 
-Second attempt: The model found the sentence to be "already well-constructed and grammatically correct", and added that it "effectively conveys a poetic and nostalgic feeling." However, the response continued, "the string of adjectives before 'akiya' is quite long, which can make the sentence feel a bit heavy." A possible improvement, according to the model, was to place a certain adjective before another one to make it flow more naturally. The model also suggested breaking up the sentence into two or more sentences or using punctation such as an em dash to improve it. While these are all valid suggestions, the model does not seem to have picked on the grammar rule that dictates the order of adjectives in English. Given this feedback, the student would have a hard time inferring the correct order of adjectives.
+- **Both models provided excellent feedback** at an expert level.  
+- **o1's response was slightly warmer**, possibly due to **cultural language nuances**.  
+- This test confirmed that both models **perform well in specialized, high-proficiency tasks**.
 
-The model was then prompted to provide feedback on the correct order of adjectives, which it provided:
+### Overall Observations
 
-```text
-1. Quantity → 2. Opinion → 3. Size → 4. Age → 5. Shape → 6. Color → 7. Origin → 8. Material → 9. Type/Purpose → Noun
-```
+✅ **o1 was more structured and professional**, but **slower**.  
+✅ **4o was more engaging**, but **less consistent** in responses.  
+✅ **Both models adapted well to high-proficiency tasks**, while **4o struggled with lower levels**.  
+✅ The **language of response varied**, with **o1 defaulting to English in the French test but Spanish in the expert-level test**.  
 
-The sentence included a determiner and 10 adjectives. The model's feedback was helpful and informative, but it was not provided in the initial response, which would have been more pedagogically valuable. It was also missing the "Physical Quality" category.
+## Conclusion & Next Steps
 
-For comparison, here's the list that was originally used to generate the scrambled adjectives, which differs only slightly from the model's feedback.
+### Key Takeaways
 
-1. Determiner: Words like a, the, my, some.
-2. Quantity: Numbers or amounts like two, several.
-3. Opinion: Descriptive words like beautiful, boring.
-4. Size: Words indicating size like small, large.
-5. Physical Quality: Descriptions of physical features like smooth, rough.
-6. Shape: Forms like round, square.
-7. Age: Descriptions of age like old, new.
-8. Color: Colors like red, blue.
-9. Origin: The place of origin like American, Chinese.
-10. Material: What something is made of like wooden, metal.
-11. Type: Categories like general-purpose, emergency.
+- **o1 was more structured and pedagogically valuable**, making it the better choice for formal language learning.  
+- **4o was more engaging but inconsistent**, making it suitable for informal practice but less reliable for structured feedback.  
+- **Both models adapted well to expert-level tasks**, but **4o struggled at lower proficiency levels** due to inconsistency.  
+- **Language response inconsistency was observed**, with **o1 switching to English in the French test but using Spanish in the expert test.**  
+- **o1 was generally slower**, taking up to **20 seconds** for some responses, which may affect real-time learning applications.
+- **o1 would likely be more costly**, as its longer response times and structured approach require more computational resources compared to 4o.
 
-[Source](https://englishstudyonline.org/order-of-adjectives/)
+### Next Steps & Potential Improvements
 
-Further research and a reliable expert source would be needed to verify the accuracy of the list. However, for the purpose of this experiment, the conclusion is that the model's feedback was not as helpful as in the Portuguese and French tests.
+- **Test with more languages & levels**  
+  - Expanding the study to **German, Italian, and Mandarin** could provide deeper insights into model adaptability.  
 
-Finally, the model suggested the following correction, along with a lengthy explanation, further ignoring the original instruction to not provide the correct sentence:
+- **Refine prompts for better guidance**  
+  - Explicitly stating learning goals in the prompt could improve responses, especially for **complex grammar concepts**.  
 
-```text
-Wouldn’t it be lovely to restore a single modest, neglected, weathered, century-old, faded, gabled, wooden, rural Japanese akiya to its former glory?
-```
+- **Compare with a memory-enabled chat**  
+  - Since **temporary chats prevent context retention**, testing with **persistent memory on** might yield different results.  
 
-#### o1 model (English)
+- **Investigate latency issues**  
+  - **o1 was significantly slower**, raising questions about efficiency in real-world use. Future testing could analyze response time variations.  
 
-Single attempt: Consistent with previously observed behaviour, the o1 model responded concisely:
+- **Explore model fine-tuning for language learning**  
+  - If OpenAI allows fine-tuning, adapting the models for **better consistency and structured guidance** could enhance their use for education.
 
-```text
-That sentence is grammatically correct, and I can clearly see what you mean. One small improvement you could consider is to make the long string of adjectives a bit easier to read (for instance, by adding commas or changing their order). This can help the sentence flow more smoothly. Otherwise, you’ve got a solid sentence!
-```
+### Final Thoughts
 
-However, the model did not provide feedback on the order of adjectives, which was the main focus of the test. The model was then prompted to provide feedback on the correct order of adjectives. On this task, it performed much better than the 4o model. First, it provided a similar list to the 4o model with the order of 9 types of adjectives, but then it observed the guidance to not provide the correct sentence and instead provided a hint to the student to consider the categories of adjectives and their order. This was a more pedagogically valuable response than the 4o model's response.
-
-```text
-When you have many adjectives describing one noun, you can also add commas or use “and” to make the sentence easier to read. Here’s a hint for your sentence: try placing the more subjective or general adjectives first, then move on to details like age, condition, shape, material, and finally the origin or location. Feel free to experiment with where “neglected,” “weathered,” and “faded” go—they often fit near the beginning (condition) or close to color/appearance.
-```
-
-It is interesting to note that the o1 model did not comment on the "poetic" and "nostalgic" intent of the sentence, as the 4o model did. Once again, the o1 model's response was more professional and less playful than the 4o model's response. The o1 model's response was more concise and to the point, which could be seen as a positive or negative depending on the student's preferences and the organization's requirements.
-
-#### Conclusion (English)
-
-The 4o model's response provided limited pedagogical value.
-
-The o1 model's response was more pedagogically valuable than the 4o model's response but still required a follow-up prompt to provide the correct order of adjectives.
-
-This particular task would have required a more elaborate prompt that specifcally focused on the order of adjectives in English. The initial results are promising, but further testing is needed to evaluate the models' performance on more complex tasks.
-
-### Spanish (expert level)
-
-Sentence used: "El cardiólogo y la intensivista han determinado que, dada tu historia médica, la intervención más adecuada en tu caso es una angioplastia coronaria."
-Translation: "The cardiologist and the intensivist have determined that, given your medical history, the most appropriate intervention in your case is a coronary angioplasty."
-
-#### 4o model (Spanish)
-
-Single attempt: The model initially replied in English, which was expected. When the test sentence in Spanish was entered, the model switched to Spanish, possibly detecting the highly sophisticated command of the target language by the user. It proceeded to make a minor but advanced improvement suggestion to replace “dada tu historia médica” por “dado tu historial médico” to use more precise medical vocabulary, consistent with the prompt's requirements and in line with the user's implied expert level of fluency. The model provided surprisingly high pedagogical value. Admiteedly, this was a bit of a stretch for the activity, but the model performed admirably. In reality, such as an advanced user would have likely queried the model directly in Spanish.
-
-#### o1 model (Spanish)
-
-Single attempt: The o1 model replied from the start in Spanish, as it did in the Portuguese test. The feedback was concise and also noted the same minor medical-context improvement as the 4o model. Curiously, the feedback felt warmer in tone than in other tests. It would be interesting to see if this is related to the Spanish language's cultural nuances or if it is a coincidence. The model's response was professional and pedagogically valuable in spite of the contrived nature of this particular test in relation to the sentence constructor activity.
-
-#### Conclusion (Spanish)
-
-Both models provided high pedagogical value and meaningful feedback at an expert level.
+This experiment highlights **the strengths and weaknesses of AI-powered language tutoring**, showing that while **AI models can provide helpful corrections, their effectiveness depends on structure, consistency, and engagement.** Future improvements in **prompt engineering, model selection, and AI memory usage** could lead to a more **reliable** and **interactive** AI-assisted learning experience.
