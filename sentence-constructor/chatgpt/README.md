@@ -33,18 +33,66 @@ Note: The target language was replaced with the language being evaluated in each
 Sentence used: "Meu filho vai a escola todos os dias."
 Translation: "My son goes to school every day."
 
-##### 4o model
+##### 4o model (Portuguese)
 
 First attempt: The model identified a small error in the preposition "a" (should be the contracted form "à") and provided helpful information to correct the error, including the grammar and hints using different sentences. Though the correct sentence was easy to infer from the feedback, the overall pedadogical value from such a simple prompt was very high.
 
 Second attempt: The model identified the error but this time provided the correct solution. This is a stark contrast to the previous response, which was more pedagogically valuable.
 
-##### o1 model
+##### o1 model (Portuguese)
 
 Single attempt: After reasoning for 4 seconds, the model surprisingly replied in Portuguese! We never told the model that the student is at a beginner level, so it might have assumed the student was more advanced. The model's response would have been challenging for a beginner student but there is some pedagogical value to interacting in the target language. After the model's initial response, the test sentence was entered. The model reasoned for 20 seconds (!) and provided a concise response that was incredibly helpful. The model identified the error and provided a hint to correct it without giving away the solution. The model also provided positive reinforcement in far more professional tone than the 4o model: unlike the 4o model, it did not use emojis but rather a single sentence. Then, the correct sentence was entered, and true to its instructions, the model acknowledged the correct sentence and provided an improvement using more advanced vocabulary. The entire interaction was very professional and pedagogically valuable and it happened exclusively in Portuguese.
 
-### Conclusion
+### Conclusion (Portuguese)
 
 The inconsistency in the 4o model's responses to the initial simple prompt makes the case for a more elaborate prompt or a more complex setup using OpenAI's API.
 
 The o1 model's response was very thoughtful and pedagogically valuable. The model's ability to reason for 20 seconds and provide a concise response that was helpful and supportive is commendable. The model's ability to interact in the target language is a plus. Though it would have been challenging for a beginner student to interact exclusively in Portuguese, we never told the model the student's proficiency level. One significant drawback is the model's slow response time, which could be a hindrance in a real-time tutoring scenario, as well as the model's cost, which is higher than the 4o model and might not be justifiable for this task.
+
+#### French (intermediate level)
+
+Sentence used: "J'aimerai bien voyager par tout le monde, dégoûter les plusieurs cuisines, et apprendre plusieurs langues."
+Corrected sentence: "J'aimerais bien voyager à travers le monde, goûter plusieurs cuisines, et apprendre plusieurs langues."
+Translation: "I would like to travel around the world, taste many cuisines, and learn many languages."
+
+##### 4o model (French)
+
+Single attempt: The model identified four errors and provided feedback for each.
+
+1. “J’aimerai” → “J’aimerais”
+    - This is a common mistake! “J’aimerais” is the correct conditional form of “aimer” (meaning “I would like”), while “J’aimerai” is the future tense (meaning “I will love”). Since you’re expressing a wish, the conditional “J’aimerais” is the right choice.
+2. “par tout le monde” → ?
+    - “Par tout” is incorrect here. Think about how you would say “all around the world” in French. A more natural phrase would be something like “à travers le monde” or “dans le monde entier”.
+3. “dégoûter” → ?
+    - Be careful! “Dégoûter” means “to disgust” rather than “to taste”. You need a verb that means “to try food”—do you know which one?
+4. “les plusieurs cuisines” → ?
+    - “Les” is unnecessary before “plusieurs” because “plusieurs” already means “several” on its own. So, you just need “plusieurs cuisines”.
+
+The feedback is generally helpful. The model’s tone is friendly and supportive, and it encourages the student to try again. The model does not provide the correct sentence, which is in line with the prompt’s requirements. It understood the intended meaning of the sentence and provided feedback accordingly.
+
+After entering the corrected sentence, the model acknowledged the correction and suggested using "découvrir" instead of "goûter" for the more nuanced meaning of not just tasting but also exploring different food cultures.
+
+The model’s response was friendly and supportive, and provided excellent pedagogical value.
+
+##### o1 model (French)
+
+Single attempt: After reasoning for 27 seconds, the model identified the same four errors as the 4o model and provided feedback for each. Curiously, unlike during the Portuguese test, the model chose to interact in English.
+
+1. Verb form: The conditional form of “I would like” isn’t spelled the way you wrote it. Look at the difference between the future tense and the conditional in French.
+2. Expression for traveling: “Par tout le monde” sounds unnatural. Think of a more common way to say “around the world” or “throughout the world” in French.
+3. Vocabulary: The verb you used before mentioning “cuisines” actually means “to disgust” or “repel.” There’s a very similar verb that means “to taste/appreciate food.”
+4. Article + “plusieurs”: Typically, you don’t combine “les” with “plusieurs.” Consider removing or changing the article.
+
+This response is more in line with the prompt’s requirements than the 4o model’s response. As observed during the Portuguese test, the o1 model’s response was concise, precise, and pedagogically valuable. The student is challenged to think and correct the errors themselves. The model asked whether more hints were needed.
+
+After entering the corrected sentence, the model acknowledged the correction, noticed the repeated use of the word "plusieurs" and suggested a stylistic improvement to the same phrase as the 4o model: "you could say *goûter à de nombreuses cuisines* or *à différentes cuisines*—just to add variety to the wording.
+
+It would appear from this last interaction that the 4o model was slightly more creative and—true to its label as a reasoning model—the o1 model was more cerebral. The o1 model's response was overall less playful than the 4o model's response. The former used no emojis and was more professional in tone, while the latter used emojis in the opening and closing paragraphs. The o1 model's response was more concise and to the point, which could be seen as a positive or negative depending on the student's preferences. Though it would be tempting to allow multiple styles, this could add complexity and costs to the project, so ultimately, the style would have to be dicatated by the organization's requirements.
+
+### Conclusion (French)
+
+The 4o model's response was friendly, supportive, and provided excellent pedagogical value. The model's tone was engaging and encouraging, and the feedback was clear and helpful. The model's response was in line with the prompt's requirements and demonstrated an understanding of the intended meaning of the sentence.
+
+The o1 model's response was concise, precise, and pedagogically valuable. The model's tone was professional and supportive, and the feedback was clear and helpful. The model's response was in line with the prompt's requirements and demonstrated an understanding of the intended meaning of the sentence. The model's response was more cerebral and less playful than the 4o model's response, which could be seen as a positive or negative depending on the student's preferences and the organization's requirements.
+
+A more polished prompt could be used to evaluate the models further, but the initial results are promising.
