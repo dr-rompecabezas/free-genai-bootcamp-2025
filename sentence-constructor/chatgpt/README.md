@@ -92,6 +92,7 @@ The following sections present a detailed breakdown of the methodology, prompts 
 ### Why Use Temporary Chats?
 
 ChatGPT's **temporary chat mode** ensures that each interaction is **stateless**, meaning:
+
 ✔️ The model does not retain context from previous messages.  
 ✔️ Responses are **not influenced by prior interactions**, ensuring fairness in testing.  
 ⚠️ **Drawback:** Once the chat is closed, the conversation history is lost, making post-analysis more challenging.
