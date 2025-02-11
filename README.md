@@ -14,7 +14,7 @@ git checkout flask-react-final
 
 The codebase was then migrated to FastAPI and Vue, using the Windsurf code editor, as part of a learning exercise to test the capabilities of the new generation of AI-powered code editors.
 
-TODO: The migration experience will be documented in a `/dev-tools` directory.
+The migration experience is documented in the `/dev-tools` directory.
 
 ## /genai-architecting directory
 
@@ -23,3 +23,7 @@ The `/genai-architecting` directory contains solution architecting assignments. 
 ## /sentence-constructor directory
 
 The `/sentence-constructor` directory contains a report on the exploration of specific large language models' baseline capabilities to act as language tutors using simple prompts and feedback.
+
+## /dev-tools directory
+
+The `/dev-tools` directory contains detailed notes on the use of Windsurf to migrate the application from Flask and React to FastAPI and Vue.
