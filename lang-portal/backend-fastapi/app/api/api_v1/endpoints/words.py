@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, asc, desc
 from sqlalchemy.exc import IntegrityError
 
 from app.db.base import get_db
@@ -12,19 +12,38 @@ router = APIRouter()
 
 @router.get("/", response_model=List[WordSchema])
 async def read_words(
-    skip: int = 0,
-    limit: int = 100,
+    page: int = 1,
+    sort_key: str = "id",
+    sort_direction: str = "asc",
+    items_per_page: int = 10,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Retrieve words.
+    Retrieve words with pagination and sorting.
     """
-    async with db as session:
-        result = await session.execute(
-            select(Word).offset(skip).limit(limit)
-        )
-        words = result.scalars().all()
-        return words
+    try:
+        skip = (page - 1) * items_per_page
+        
+        # Build the query with sorting
+        query = select(Word)
+        
+        # Add sorting
+        if hasattr(Word, sort_key):
+            sort_column = getattr(Word, sort_key)
+            if sort_direction.lower() == "desc":
+                query = query.order_by(desc(sort_column))
+            else:
+                query = query.order_by(asc(sort_column))
+        
+        # Add pagination
+        query = query.offset(skip).limit(items_per_page)
+        
+        async with db as session:
+            result = await session.execute(query)
+            words = result.scalars().all()
+            return words
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/", response_model=WordSchema)
 async def create_word(
@@ -36,9 +55,10 @@ async def create_word(
     """
     try:
         db_word = Word(
-            word=word.word,
-            reading=word.reading,
-            meaning=word.meaning,
+            kanji=word.kanji,
+            romaji=word.romaji,
+            english=word.english,
+            parts=word.parts,
             group_id=word.group_id
         )
         db.add(db_word)
@@ -80,22 +100,26 @@ async def update_word(
         result = await session.execute(
             select(Word).filter(Word.id == word_id)
         )
-        db_word = result.scalar_one_or_none()
+        word = result.scalar_one_or_none()
         
-        if db_word is None:
+        if word is None:
             raise HTTPException(status_code=404, detail="Word not found")
-            
-        update_data = word_update.model_dump(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_word, field, value)
-            
-        try:
-            await session.commit()
-            await session.refresh(db_word)
-            return db_word
-        except IntegrityError:
-            await session.rollback()
-            raise HTTPException(status_code=500, detail="Invalid group_id")
+        
+        # Update word fields if provided
+        if word_update.kanji is not None:
+            word.kanji = word_update.kanji
+        if word_update.romaji is not None:
+            word.romaji = word_update.romaji
+        if word_update.english is not None:
+            word.english = word_update.english
+        if word_update.parts is not None:
+            word.parts = word_update.parts
+        if word_update.group_id is not None:
+            word.group_id = word_update.group_id
+        
+        await session.commit()
+        await session.refresh(word)
+        return word
 
 @router.delete("/{word_id}")
 async def delete_word(
@@ -113,8 +137,7 @@ async def delete_word(
         
         if word is None:
             raise HTTPException(status_code=404, detail="Word not found")
-            
+        
         await session.delete(word)
         await session.commit()
-        
-    return {"ok": True}
+        return {"message": "Word deleted successfully"}

@@ -101,9 +101,10 @@ async def test_word(db_session: AsyncSession, test_group: dict) -> dict:
     """Create a test word."""
     from app.models.word import Word
     word = Word(
-        word="テスト",
-        reading="てすと",
-        meaning="test",
+        kanji="テスト",
+        romaji="てすと",
+        english="test",
+        parts="[]",  # Empty JSON array as string
         group_id=test_group["id"]
     )
     db_session.add(word)
@@ -111,9 +112,10 @@ async def test_word(db_session: AsyncSession, test_group: dict) -> dict:
     await db_session.refresh(word)
     return {
         "id": word.id,
-        "word": word.word,
-        "reading": word.reading,
-        "meaning": word.meaning,
+        "kanji": word.kanji,
+        "romaji": word.romaji,
+        "english": word.english,
+        "parts": word.parts,
         "group_id": word.group_id
     }
 
