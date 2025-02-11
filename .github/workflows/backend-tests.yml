@@ -33,5 +33,7 @@ jobs:
         pip install pytest pytest-asyncio httpx
 
     - name: Run tests
+      env:
+        PYTHONPATH: ${{ github.workspace }}/lang-portal/backend-fastapi
       run: |
         pytest tests/api/ -v
