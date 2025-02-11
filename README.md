@@ -1,14 +1,14 @@
 # GenAI Bootcamp 2025: Building an AI-enhanced Language Learning Platform
 
-This repository contains assignments completed during the ExamPro's free GenAI Bootcamp. Be aware that no code in here is **not meant for production use**. The releases and git tags are meant to serve as a record of progress through the bootcamp. Similarly, GitHub issues have been used only as a way to help instructors quickly reference the commits related to a particular assignment.
+This repository contains assignments completed during ExamPro's free GenAI Bootcamp. Be aware that this code is not meant for production use. The releases and git tags are meant to serve as a record of progress through the boot camp. Similarly, GitHub issues have been used to help instructors quickly reference the commits related to a particular assignment.
 
-This README explains the project structure, starting with the `lang-portal` directory. Additional README files are provided throughout the codebase in context.
+This README explains the project structure, starting with the `lang-portal` directory. Additional README files are provided throughout the context of the codebase.
 
 ## /lang-portal directory
 
 This is the main repository of the language learning platform. It originally contained a Flask backend and a React frontend, copied over as-is, from the instructor's repository. The last commit before switching to FastAPI and Vue is tagged as `flask-react-final`. To view the old implementation in a detached HEAD state, run:
 
-```bash
+```sh
 git checkout flask-react-final
 ```
 
