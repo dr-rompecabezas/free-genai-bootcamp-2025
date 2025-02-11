@@ -1,0 +1,12 @@
+Metadata-Version: 2.2
+Name: lang-portal-backend
+Version: 0.1.0
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: sqlalchemy
+Requires-Dist: alembic
+Requires-Dist: aiosqlite
+Requires-Dist: pytest
+Requires-Dist: pytest-asyncio
+Requires-Dist: httpx
+Dynamic: requires-dist
