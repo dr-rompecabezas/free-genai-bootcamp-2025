@@ -1,6 +1,6 @@
 # Language Learning Portal - Vue Frontend
 
-This is the Vue frontend for the Language Learning Portal, providing user interface and interaction.
+This is the Vue frontend for the Language Learning Portal.
 
 ## Recommended IDE Setup
 
