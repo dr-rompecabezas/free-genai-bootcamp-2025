@@ -1,7 +1,12 @@
+import sys
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
+
+# Add the parent directory to the path so that the models can be imported
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from alembic import context
 from src.toki_pona_api.models import Base
