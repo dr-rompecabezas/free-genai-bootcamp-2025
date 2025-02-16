@@ -1,5 +1,43 @@
 # Project Structure
 
+1. Project Root:
+
+    - `requirements.txt`: Project dependencies
+    - `pyproject.toml`: Modern Python project metadata
+    - `.env.example`: Environment variables
+    - `alembic.ini`: Database migration configuration
+
+2. Source Code (`src/toki_pona_api/`):
+
+    - `main.py`: Application entry point
+    - `config.py`: Configuration management
+    - `dependencies.py`: FastAPI dependencies
+    - `exceptions.py`: Custom exception classes
+
+3. API Structure (`api/`):
+
+    - Version-controlled API (`v1/`)
+    - Separate endpoint modules for each resource
+    - Central router combining all endpoints
+
+4. Data Layer:
+
+    - `crud/`: CRUD operations for each model
+    - `models/`: SQLAlchemy models
+    - `schemas/`: Pydantic models for request/response
+    - `db/`: Database configuration and session management
+
+5. Tests:
+
+    - Separate test directories for API and CRUD operations
+    - `conftest.py` for pytest fixtures
+    - Parallel structure to source code
+
+6. Migrations:
+
+    - Alembic migrations for database schema changes
+
+```plaintext
 toki-pona-api/
 ├── README.md
 ├── requirements.txt
@@ -62,3 +100,4 @@ toki-pona-api/
     ├── env.py
     ├── script.py.mako
     └── versions/
+```
