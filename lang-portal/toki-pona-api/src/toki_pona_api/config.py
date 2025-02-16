@@ -1,15 +1,20 @@
 from typing import List
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl
 
 class Settings(BaseSettings):
-    API_V1_PREFIX: str = "/api/v1"
+    # API Settings
+    API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "Toki Pona API"
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
-    DATABASE_URL: str
-    
+
+    # CORS Settings
+    CORS_ORIGINS: List[str] = ["http://localhost:3000"]  # Frontend URL
+
+    # Database Settings
+    SQLALCHEMY_DATABASE_URI: str
+    SQLALCHEMY_ECHO: bool = False
+
     class Config:
-        case_sensitive = True
         env_file = ".env"
+        case_sensitive = True
 
 settings = Settings()
