@@ -5,7 +5,7 @@ from ..config import settings
 
 # Create SQLAlchemy engine
 engine = create_engine(
-    settings.SQLALCHEMY_DATABASE_URI,
+    settings.DATABASE_URL,
     pool_pre_ping=True,
     echo=settings.SQLALCHEMY_ECHO
 )
