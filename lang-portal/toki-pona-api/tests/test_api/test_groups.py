@@ -1,7 +1,6 @@
-# tests/test_api/test_groups.py
 def test_get_groups(client, sample_group):
     """Test getting list of groups."""
-    response = client.get("/groups")
+    response = client.get("/api/v1/groups")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
@@ -10,7 +9,7 @@ def test_get_groups(client, sample_group):
 
 def test_get_group_words(client, sample_group):
     """Test getting words in a group."""
-    response = client.get(f"/groups/{sample_group.id}")
+    response = client.get(f"/api/v1/groups/{sample_group.id}/words")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
