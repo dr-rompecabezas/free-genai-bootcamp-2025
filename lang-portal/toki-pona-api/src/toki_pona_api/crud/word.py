@@ -16,5 +16,14 @@ class CRUDWord(CRUDBase[Word, WordCreate, WordBase]):
             .filter(Word.groups.any(id=group_id))
             .all()
         )
+    
+    def update_review_counts(self, db: Session, *, word_id: int, correct: bool) -> Word:
+        word = self.get(db, id=word_id)
+        if correct:
+            word.correct_count += 1
+        else:
+            word.wrong_count += 1
+        db.commit()
+        return word
 
-word = CRUDWord(Word)
+crud_word = CRUDWord(Word)
