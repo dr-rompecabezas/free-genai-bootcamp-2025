@@ -1,70 +1,87 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
-from fastapi import FastAPI, Query, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import FastAPI, Query, HTTPException, Depends
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, JSON, Table
+from sqlalchemy.orm import Session, relationship, DeclarativeBase
+from sqlalchemy.sql import func
 from enum import Enum
 
-# --- Pydantic Models ---
+# --- SQLAlchemy Setup ---
 
-class SortOrder(str, Enum):
-    ASC = "asc"
-    DESC = "desc"
+class Base(DeclarativeBase):
+    pass
 
-class WordBase(BaseModel):
-    toki_pona: str = Field(..., description="The word in Toki Pona")
-    english: str = Field(..., description="English translation of the word")
-    definition: str = Field(..., description="Detailed definition in English")
+# Association table for many-to-many relationship between words and groups
+word_groups = Table(
+    'word_groups',
+    Base.metadata,
+    Column('word_id', Integer, ForeignKey('words.id', ondelete='CASCADE')),
+    Column('group_id', Integer, ForeignKey('groups.id', ondelete='CASCADE'))
+)
 
-class Word(WordBase):
-    id: int
-    correct_count: int = Field(default=0)
-    wrong_count: int = Field(default=0)
+# --- SQLAlchemy Models ---
 
-    class Config:
-        from_attributes = True
+class WordModel(Base):
+    __tablename__ = "words"
 
-class GroupBase(BaseModel):
-    name: str = Field(..., description="Name of the word group")
-    description: Optional[str] = None
+    id = Column(Integer, primary_key=True, index=True)
+    toki_pona = Column(String, nullable=False, index=True)
+    english = Column(String, nullable=False)
+    definition = Column(String, nullable=False)
+    components = Column(JSON, nullable=False, default=dict)
+    correct_count = Column(Integer, default=0)
+    wrong_count = Column(Integer, default=0)
 
-class Group(GroupBase):
-    id: int
-    words_count: int = Field(default=0)
+    # Relationships
+    groups = relationship("GroupModel", secondary=word_groups, back_populates="words")
+    reviews = relationship("WordReviewModel", back_populates="word")
 
-    class Config:
-        from_attributes = True
+class GroupModel(Base):
+    __tablename__ = "groups"
 
-class StudyActivityBase(BaseModel):
-    name: str = Field(..., description="Name of the study activity")
-    url: str = Field(..., description="URL of the study activity")
-    description: Optional[str] = None
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False, index=True)
+    description = Column(String)
+    words_count = Column(Integer, default=0)
 
-class StudyActivity(StudyActivityBase):
-    id: int
+    # Relationships
+    words = relationship("WordModel", secondary=word_groups, back_populates="groups")
+    study_sessions = relationship("StudySessionModel", back_populates="group")
 
-    class Config:
-        from_attributes = True
+class StudyActivityModel(Base):
+    __tablename__ = "study_activities"
 
-class StudySessionCreate(BaseModel):
-    group_id: int
-    study_activity_id: int
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    url = Column(String, nullable=False)
+    description = Column(String)
 
-class StudySession(StudySessionCreate):
-    id: int
-    created_at: datetime
+    # Relationships
+    sessions = relationship("StudySessionModel", back_populates="activity")
 
-    class Config:
-        from_attributes = True
+class StudySessionModel(Base):
+    __tablename__ = "study_sessions"
 
-class WordReviewCreate(BaseModel):
-    word_id: int
-    correct: bool
+    id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("groups.id", ondelete="CASCADE"))
+    study_activity_id = Column(Integer, ForeignKey("study_activities.id", ondelete="CASCADE"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-class WordReview(WordReviewCreate):
-    id: int
-    study_session_id: int
-    created_at: datetime
+    # Relationships
+    group = relationship("GroupModel", back_populates="study_sessions")
+    activity = relationship("StudyActivityModel", back_populates="sessions")
+    reviews = relationship("WordReviewModel", back_populates="session")
 
-    class Config:
-        from_attributes = True
+class WordReviewModel(Base):
+    __tablename__ = "word_review_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    word_id = Column(Integer, ForeignKey("words.id", ondelete="CASCADE"))
+    study_session_id = Column(Integer, ForeignKey("study_sessions.id", ondelete="CASCADE"))
+    correct = Column(Boolean, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    word = relationship("WordModel", back_populates="reviews")
+    session = relationship("StudySessionModel", back_populates="reviews")
