@@ -1,16 +1,23 @@
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-
-def test_create_word(client: TestClient, db: Session):
-    data = {
-        "word": "toki",
-        "definition": "language, talk, speak, word, communicate",
-        "examples": "toki pona = good language"
-    }
-    response = client.post("/api/v1/words/", json=data)
+# tests/test_api/test_words.py
+def test_get_words(client, sample_words):
+    """Test getting list of words."""
+    response = client.get("/words")
     assert response.status_code == 200
-    content = response.json()
-    assert content["word"] == data["word"]
-    assert content["definition"] == data["definition"]
-    assert content["examples"] == data["examples"]
-    assert "id" in content
+    data = response.json()
+    assert len(data) == 2
+    assert data[0]["toki_pona"] == "telo"
+    assert data[1]["toki_pona"] == "pona"
+
+def test_get_word(client, sample_words):
+    """Test getting a specific word."""
+    word_id = sample_words[0].id
+    response = client.get(f"/words/{word_id}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["toki_pona"] == "telo"
+    assert data["english"] == "water"
+
+def test_get_nonexistent_word(client):
+    """Test getting a word that doesn't exist."""
+    response = client.get("/words/999")
+    assert response.status_code == 404

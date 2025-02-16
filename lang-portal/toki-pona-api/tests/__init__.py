@@ -94,107 +94,10 @@ def sample_activity(db_session):
     db_session.commit()
     return activity
 
-# tests/test_api/test_words.py
-def test_get_words(client, sample_words):
-    """Test getting list of words."""
-    response = client.get("/words")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 2
-    assert data[0]["toki_pona"] == "telo"
-    assert data[1]["toki_pona"] == "pona"
 
-def test_get_word(client, sample_words):
-    """Test getting a specific word."""
-    word_id = sample_words[0].id
-    response = client.get(f"/words/{word_id}")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["toki_pona"] == "telo"
-    assert data["english"] == "water"
 
-def test_get_nonexistent_word(client):
-    """Test getting a word that doesn't exist."""
-    response = client.get("/words/999")
-    assert response.status_code == 404
 
-# tests/test_api/test_groups.py
-def test_get_groups(client, sample_group):
-    """Test getting list of groups."""
-    response = client.get("/groups")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 1
-    assert data[0]["name"] == "Basic Words"
-    assert data[0]["words_count"] == 2
 
-def test_get_group_words(client, sample_group):
-    """Test getting words in a group."""
-    response = client.get(f"/groups/{sample_group.id}")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 2
-    assert data[0]["toki_pona"] == "telo"
 
-# tests/test_api/test_study_sessions.py
-def test_create_study_session(client, sample_group, sample_activity):
-    """Test creating a new study session."""
-    response = client.post(
-        "/study_sessions",
-        json={
-            "group_id": sample_group.id,
-            "study_activity_id": sample_activity.id
-        }
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["group_id"] == sample_group.id
-    assert data["study_activity_id"] == sample_activity.id
 
-def test_create_word_review(client, sample_words, sample_group, sample_activity):
-    """Test creating a word review in a study session."""
-    # First create a study session
-    session_response = client.post(
-        "/study_sessions",
-        json={
-            "group_id": sample_group.id,
-            "study_activity_id": sample_activity.id
-        }
-    )
-    session_id = session_response.json()["id"]
-    
-    # Then create a review
-    review_response = client.post(
-        f"/study_sessions/{session_id}/review",
-        json={
-            "word_id": sample_words[0].id,
-            "correct": True
-        }
-    )
-    assert review_response.status_code == 200
-    data = review_response.json()
-    assert data["word_id"] == sample_words[0].id
-    assert data["correct"] == True
 
-# tests/test_crud/test_words.py
-from toki_pona_api.crud.words import crud_word
-
-def test_create_word(db_session):
-    """Test creating a new word."""
-    word_data = {
-        "toki_pona": "moku",
-        "english": "food",
-        "definition": "food, to eat",
-        "components": {"root": "moku"}
-    }
-    word = crud_word.create(db_session, obj_in=word_data)
-    assert word.toki_pona == "moku"
-    assert word.english == "food"
-
-def test_update_review_counts(db_session, sample_words):
-    """Test updating word review counts."""
-    word = sample_words[0]
-    initial_correct = word.correct_count
-    
-    crud_word.update_review_counts(db_session, word_id=word.id, correct=True)
-    assert word.correct_count == initial_correct + 1
