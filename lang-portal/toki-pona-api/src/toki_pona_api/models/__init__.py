@@ -1,7 +1,4 @@
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-
+from ..db.base import Base
 from .word import Word
 from .group import Group, word_groups
 from .study_session import StudyActivity, StudySession, WordReview
