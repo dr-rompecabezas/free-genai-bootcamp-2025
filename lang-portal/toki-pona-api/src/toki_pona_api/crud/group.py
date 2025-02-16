@@ -17,4 +17,4 @@ class CRUDGroup(CRUDBase[Group, GroupCreate, GroupBase]):
         db.refresh(group)
         return group
 
-group = CRUDGroup(Group)
+crud_group = CRUDGroup(Group)

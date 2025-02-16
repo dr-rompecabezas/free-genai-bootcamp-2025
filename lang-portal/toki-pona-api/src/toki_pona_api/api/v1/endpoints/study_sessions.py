@@ -8,7 +8,7 @@ from ....schemas.study_session import (
     WordReview,
     WordReviewCreate
 )
-from ....crud.study_session import study_session, word_review
+from ....crud.study_session import crud_study_session, crud_word_review
 
 router = APIRouter()
 
@@ -20,7 +20,7 @@ async def create_study_session(
     """
     Create a new study session for a group
     """
-    return study_session.create(db=db, obj_in=session)
+    return crud_study_session.create(db=db, obj_in=session)
 
 @router.post("/{session_id}/review", response_model=WordReview)
 async def create_word_review(
@@ -32,7 +32,7 @@ async def create_word_review(
     Log a review attempt for a word during a study session
     """
     # Verify session exists
-    if not study_session.get(db=db, id=session_id):
+    if not crud_study_session.get(db=db, id=session_id):
         raise HTTPException(status_code=404, detail="Study session not found")
     
     review_data = WordReviewCreate(
@@ -40,4 +40,4 @@ async def create_word_review(
         correct=review.correct,
         study_session_id=session_id
     )
-    return word_review.create(db=db, obj_in=review_data)
+    return crud_word_review.create(db=db, obj_in=review_data)

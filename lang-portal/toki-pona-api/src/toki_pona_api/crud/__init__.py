@@ -1,11 +1,11 @@
-from .word import word
-from .group import group
-from .study_session import study_session, study_activity, word_review
+from .word import crud_word
+from .group import crud_group
+from .study_session import crud_study_session, crud_study_activity, crud_word_review
 
 __all__ = [
-    "word",
-    "group",
-    "study_session",
-    "study_activity",
-    "word_review"
+    "crud_word",
+    "crud_group",
+    "crud_study_session",
+    "crud_study_activity",
+    "crud_word_review"
 ]

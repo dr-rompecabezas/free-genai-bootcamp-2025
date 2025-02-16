@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from ....db.session import get_db
 from ....schemas.word import Word
-from ....crud.word import word
+from ....crud.word import crud_word
 from ..utils import SortOrder
 
 router = APIRouter()
@@ -20,4 +20,4 @@ async def get_words(
     Get a paginated list of Toki Pona words with review statistics
     """
     skip = (page - 1) * 100
-    return word.get_multi(db=db, skip=skip, limit=100)
+    return crud_word.get_multi(db=db, skip=skip, limit=100)

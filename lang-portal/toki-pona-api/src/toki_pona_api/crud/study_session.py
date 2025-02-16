@@ -32,6 +32,6 @@ class CRUDWordReview(CRUDBase[WordReview, WordReviewCreate, WordReviewBase]):
             .all()
         )
 
-study_session = CRUDStudySession(StudySession)
-study_activity = CRUDStudyActivity(StudyActivity)
-word_review = CRUDWordReview(WordReview)
+crud_study_session = CRUDStudySession(StudySession)
+crud_study_activity = CRUDStudyActivity(StudyActivity)
+crud_word_review = CRUDWordReview(WordReview)
