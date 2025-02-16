@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Toki Pona API"
 
     # CORS Settings
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:3000"]
+    CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:3000"]
 
     # Database Settings
     DATABASE_URL: str
