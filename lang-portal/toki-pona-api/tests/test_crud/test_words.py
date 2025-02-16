@@ -1,5 +1,4 @@
-# tests/test_crud/test_words.py
-from toki_pona_api.crud.words import crud_word
+from src.toki_pona_api.crud.word import crud_word
 
 def test_create_word(db_session):
     """Test creating a new word."""
