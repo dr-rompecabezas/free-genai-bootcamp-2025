@@ -36,6 +36,14 @@ A FastAPI-based REST API for managing Toki Pona language learning resources.
     uvicorn src.toki_pona_api.main:app --reload
     ```
 
+## Running Tests
+
+To run tests, use the following command:
+
+```bash
+pytest
+```
+
 ## Project Structure
 
 The project follows a modular structure with clear separation of concerns:
