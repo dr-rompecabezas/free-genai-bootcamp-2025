@@ -1,0 +1,23 @@
+[project]
+name = "toki-pona-api"
+version = "0.1.0"
+description = "A FastAPI-based REST API for managing Toki Pona language learning resources"
+authors = [
+    {name = "Felipe Villegas", email = "felavid@gmail.com"},
+]
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.22.0",
+    "sqlalchemy>=2.0.0",
+    "alembic>=1.11.0",
+]
+requires-python = ">=3.8"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=src"
