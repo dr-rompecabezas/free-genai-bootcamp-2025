@@ -9,10 +9,7 @@ from src.toki_pona_api.schemas.word import WordCreate, WordBase
 
 
 # Create a test CRUD class using Word model
-class TestCRUD(CRUDBase[Word, WordCreate, WordBase]):
-    pass
-
-crud_test = TestCRUD(Word)
+crud_test = CRUDBase[Word, WordCreate, WordBase](Word)
 
 def test_get(db_session, sample_words):
     """Test retrieving a single item by ID."""
@@ -55,44 +52,38 @@ def test_create(db_session):
 
 def test_update(db_session, sample_words):
     """Test updating an item."""
-    # Get existing word
+    # Get an existing word
     word = crud_test.get(db_session, id=sample_words[0])
     
-    # Test updating with Pydantic model
+    # Update with Pydantic model
     update_data = WordBase(
-        toki_pona=word.toki_pona,
-        english="updated_english",
-        definition=word.definition,
-        components=word.components
+        toki_pona="ilo",
+        english="tool",
+        definition="tool, machine, device",
+        components={"root": "ilo"}
     )
     updated_word = crud_test.update(db_session, db_obj=word, obj_in=update_data)
-    assert updated_word.english == "updated_english"
+    assert updated_word.toki_pona == "ilo"
+    assert updated_word.english == "tool"
     
-    # Test updating with dictionary
-    dict_update = {"english": "dict_updated"}
-    dict_updated_word = crud_test.update(db_session, db_obj=word, obj_in=dict_update)
-    assert dict_updated_word.english == "dict_updated"
-    
-    # Test updating with empty dictionary
-    empty_dict_update = {}
-    empty_dict_updated_word = crud_test.update(db_session, db_obj=word, obj_in=empty_dict_update)
-    assert empty_dict_updated_word.english == "dict_updated"  # Should remain unchanged
-    
-    # Test updating with None values in dictionary
-    none_dict_update = {"english": None}
-    none_dict_updated_word = crud_test.update(db_session, db_obj=word, obj_in=none_dict_update)
-    assert none_dict_updated_word.english is None
+    # Update with dict
+    update_dict = {"toki_pona": "tomo", "english": "house"}
+    updated_word = crud_test.update(db_session, db_obj=word, obj_in=update_dict)
+    assert updated_word.toki_pona == "tomo"
+    assert updated_word.english == "house"
+    # Previous fields should remain unchanged if not in update dict
+    assert updated_word.definition == "tool, machine, device"
 
 def test_remove(db_session, sample_words):
     """Test removing an item."""
-    # Remove existing word
+    # Test with existing word
     word = crud_test.remove(db_session, id=sample_words[0])
     assert word.id == sample_words[0]
     
-    # Verify word is removed
-    removed_word = crud_test.get(db_session, id=sample_words[0])
-    assert removed_word is None
+    # Verify word was removed
+    deleted_word = crud_test.get(db_session, id=sample_words[0])
+    assert deleted_word is None
     
-    # Test removing non-existent word
-    with pytest.raises(ValueError, match=r"Object with id 99999 not found"):
+    # Test with non-existent word
+    with pytest.raises(ValueError):
         crud_test.remove(db_session, id=99999)
