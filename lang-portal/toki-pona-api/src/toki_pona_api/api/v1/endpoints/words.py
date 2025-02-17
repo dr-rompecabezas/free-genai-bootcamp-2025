@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 
 from ....db.session import get_db
@@ -21,3 +21,16 @@ async def get_words(
     """
     skip = (page - 1) * 100
     return crud_word.get_multi(db=db, skip=skip, limit=100)
+
+@router.get("/{word_id}", response_model=Word)
+async def get_word(
+    word_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Get a specific word by ID
+    """
+    word = crud_word.get(db=db, id=word_id)
+    if not word:
+        raise HTTPException(status_code=404, detail="Word not found")
+    return word
