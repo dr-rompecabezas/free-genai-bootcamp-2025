@@ -39,3 +39,14 @@ def test_create_word_review(client, sample_words, sample_group, sample_activity)
     assert data["word_id"] == sample_words[0]
     assert data["study_session_id"] == session_id
     assert data["correct"] == True
+    
+    # Test with non-existent session
+    error_response = client.post(
+        "/api/v1/study-sessions/99999/review",
+        json={
+            "word_id": sample_words[0],
+            "correct": True
+        }
+    )
+    assert error_response.status_code == 404
+    assert error_response.json()["detail"] == "Study session not found"
