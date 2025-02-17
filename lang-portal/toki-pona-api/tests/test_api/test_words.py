@@ -1,5 +1,3 @@
-from src.toki_pona_api.crud.word import word
-
 def test_get_words(client, sample_words):
     """Test getting list of words."""
     response = client.get("/api/v1/words")
@@ -11,7 +9,7 @@ def test_get_words(client, sample_words):
 
 def test_get_word(client, sample_words):
     """Test getting a specific word."""
-    word_id = sample_words[0].id
+    word_id = sample_words[0]
     response = client.get(f"/api/v1/words/{word_id}")
     assert response.status_code == 200
     data = response.json()

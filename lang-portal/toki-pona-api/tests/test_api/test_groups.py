@@ -9,7 +9,7 @@ def test_get_groups(client, sample_group):
 
 def test_get_group_words(client, sample_group):
     """Test getting words in a group."""
-    response = client.get(f"/api/v1/groups/{sample_group.id}/words")
+    response = client.get(f"/api/v1/groups/{sample_group}/words")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
