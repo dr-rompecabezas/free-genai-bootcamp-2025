@@ -74,29 +74,27 @@ def sample_words(db_session):
     for word in words:
         db_session.add(word)
     db_session.commit()
-    return words
+    
+    # Return IDs instead of objects
+    return [word.id for word in words]
 
 @pytest.fixture
 def sample_group(db_session, sample_words):
     """Creates a sample word group for testing."""
-    # First create the group
     group = Group(
         name="Basic Words",
         description="Essential Toki Pona vocabulary"
     )
     db_session.add(group)
-    db_session.flush()  # Get the group ID
+    db_session.flush()
     
-    # Add words explicitly
-    for word in sample_words:
+    # Get words from IDs
+    words = db_session.query(Word).filter(Word.id.in_(sample_words)).all()
+    for word in words:
         group.words.append(word)
     
     db_session.commit()
-    db_session.refresh(group)
-    
-    # Verify relationship
-    assert len(group.words) == 2, f"Group has {len(group.words)} words instead of 2"
-    return group
+    return group.id  # Return ID instead of object
 
 @pytest.fixture
 def sample_activity(db_session):
@@ -108,4 +106,4 @@ def sample_activity(db_session):
     )
     db_session.add(activity)
     db_session.commit()
-    return activity
+    return activity.id  # Return ID instead of object
