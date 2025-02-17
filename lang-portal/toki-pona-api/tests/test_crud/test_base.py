@@ -72,6 +72,16 @@ def test_update(db_session, sample_words):
     dict_update = {"english": "dict_updated"}
     dict_updated_word = crud_test.update(db_session, db_obj=word, obj_in=dict_update)
     assert dict_updated_word.english == "dict_updated"
+    
+    # Test updating with empty dictionary
+    empty_dict_update = {}
+    empty_dict_updated_word = crud_test.update(db_session, db_obj=word, obj_in=empty_dict_update)
+    assert empty_dict_updated_word.english == "dict_updated"  # Should remain unchanged
+    
+    # Test updating with None values in dictionary
+    none_dict_update = {"english": None}
+    none_dict_updated_word = crud_test.update(db_session, db_obj=word, obj_in=none_dict_update)
+    assert none_dict_updated_word.english is None
 
 def test_remove(db_session, sample_words):
     """Test removing an item."""
@@ -82,3 +92,7 @@ def test_remove(db_session, sample_words):
     # Verify word is removed
     removed_word = crud_test.get(db_session, id=sample_words[0])
     assert removed_word is None
+    
+    # Test removing non-existent word
+    with pytest.raises(ValueError, match=r"Object with id 99999 not found"):
+        crud_test.remove(db_session, id=99999)
