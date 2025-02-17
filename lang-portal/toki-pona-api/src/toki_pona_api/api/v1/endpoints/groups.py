@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 
 from ....db.session import get_db
@@ -15,7 +15,7 @@ router = APIRouter()
 @router.get("/", response_model=List[Group])
 async def get_groups(
     page: int = Query(1, ge=1),
-    sort_by: str = Query("name", regex="^(name|words_count)$"),
+    sort_by: str = Query("name", pattern="^(name)$"),
     order: SortOrder = Query(SortOrder.ASC),
     db: Session = Depends(get_db)
 ):
@@ -26,7 +26,9 @@ async def get_groups(
     groups = crud_group.get_multi(
         db,
         skip=skip,
-        limit=settings.PAGE_SIZE
+        limit=settings.PAGE_SIZE,
+        sort_by=sort_by,
+        order=order
     )
     
     return [
@@ -43,11 +45,23 @@ async def get_groups(
 async def get_group_words(
     group_id: int,
     page: int = Query(1, ge=1),
-    sort_by: str = Query("toki_pona", regex="^(toki_pona|english|correct_count|wrong_count)$"),
+    sort_by: str = Query("toki_pona", pattern="^(toki_pona|english|correct_count|wrong_count)$"),
     order: SortOrder = Query(SortOrder.ASC),
     db: Session = Depends(get_db)
 ):
     """
     Get words from a specific group
     """
-    return crud_word.get_by_group(db=db, group_id=group_id)
+    group = crud_group.get(db=db, id=group_id)
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    skip = (page - 1) * settings.PAGE_SIZE
+    return crud_word.get_by_group(
+        db=db,
+        group_id=group_id,
+        skip=skip,
+        limit=settings.PAGE_SIZE,
+        sort_by=sort_by,
+        order=order
+    )
