@@ -1,5 +1,6 @@
 import pytest
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.exc import FlushError
 
 from src.toki_pona_api.crud.group import crud_group
 from src.toki_pona_api.schemas.group import GroupCreate, GroupBase
@@ -19,10 +20,15 @@ def test_create_group(db_session):
 
 def test_get_group_by_name(db_session, sample_group):
     """Test retrieving a group by name."""
+    # Test with existing group
     group = crud_group.get_by_name(db_session, name="Basic Words")
     assert group is not None
     assert group.id == sample_group
     assert group.description == "Essential Toki Pona vocabulary"
+    
+    # Test with non-existent group
+    non_existent_group = crud_group.get_by_name(db_session, name="NonExistentGroup")
+    assert non_existent_group is None
 
 def test_add_word_to_group(db_session, sample_group, sample_words):
     """Test adding a word to an existing group."""
@@ -45,6 +51,14 @@ def test_add_word_to_group(db_session, sample_group, sample_words):
     # Verify word was added
     assert len(updated_group.words) == initial_word_count + 1
     assert any(word.toki_pona == "ilo" for word in updated_group.words)
+    
+    # Test with non-existent group
+    with pytest.raises(AttributeError):
+        crud_group.add_word(db_session, group_id=99999, word_id=new_word.id)
+    
+    # Test with non-existent word
+    with pytest.raises(FlushError):
+        crud_group.add_word(db_session, group_id=sample_group, word_id=99999)
 
 def test_get_multi_groups(db_session, sample_group):
     """Test retrieving multiple groups with pagination."""
@@ -64,3 +78,7 @@ def test_get_multi_groups(db_session, sample_group):
     # Test pagination
     groups_page = crud_group.get_multi(db_session, skip=1, limit=2)
     assert len(groups_page) == 2
+    
+    # Test with skip > total groups
+    empty_groups = crud_group.get_multi(db_session, skip=10, limit=10)
+    assert len(empty_groups) == 0
