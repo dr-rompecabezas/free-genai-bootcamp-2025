@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     SQLALCHEMY_ECHO: bool = False
 
+    # Pagination Settings
+    PAGE_SIZE: int = 100
+
     class Config:
         env_file = ".env"
         case_sensitive = True

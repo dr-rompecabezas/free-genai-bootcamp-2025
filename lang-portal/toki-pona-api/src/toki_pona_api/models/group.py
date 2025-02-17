@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Table, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Table, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from ..db.base import Base
@@ -7,8 +7,9 @@ from ..db.base import Base
 word_groups = Table(
     "word_groups",
     Base.metadata,
-    Column("word_id", Integer, ForeignKey("words.id"), primary_key=True),
-    Column("group_id", Integer, ForeignKey("groups.id"), primary_key=True)
+    Column("word_id", Integer, ForeignKey("words.id")),
+    Column("group_id", Integer, ForeignKey("groups.id")),
+    UniqueConstraint("word_id", "group_id", name="uq_word_group")
 )
 
 class Group(Base):
@@ -22,6 +23,7 @@ class Group(Base):
     words = relationship(
         "Word",
         secondary="word_groups",
-        back_populates="groups"
+        back_populates="groups",
+        lazy="joined"
     )
     study_sessions = relationship("StudySession", back_populates="group")

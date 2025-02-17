@@ -35,6 +35,13 @@ def db_session(engine):
         session.rollback()
         session.close()
 
+@pytest.fixture(autouse=True)
+def clean_tables(db_session):
+    """Clean all tables before each test."""
+    for table in Base.metadata.sorted_tables:
+        db_session.execute(table.delete())
+    db_session.commit()
+
 @pytest.fixture(scope="function")
 def client(db_session):
     """Creates a test client with a clean database."""
@@ -42,7 +49,7 @@ def client(db_session):
         try:
             yield db_session
         finally:
-            pass
+            db_session.close()
     
     app.dependency_overrides[get_db] = override_get_db
     return TestClient(app)
@@ -72,13 +79,23 @@ def sample_words(db_session):
 @pytest.fixture
 def sample_group(db_session, sample_words):
     """Creates a sample word group for testing."""
+    # First create the group
     group = Group(
         name="Basic Words",
         description="Essential Toki Pona vocabulary"
     )
-    group.words = sample_words
     db_session.add(group)
+    db_session.flush()  # Get the group ID
+    
+    # Add words explicitly
+    for word in sample_words:
+        group.words.append(word)
+    
     db_session.commit()
+    db_session.refresh(group)
+    
+    # Verify relationship
+    assert len(group.words) == 2, f"Group has {len(group.words)} words instead of 2"
     return group
 
 @pytest.fixture

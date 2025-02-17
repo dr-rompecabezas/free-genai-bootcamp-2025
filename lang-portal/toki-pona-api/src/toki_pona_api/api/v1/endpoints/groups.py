@@ -8,6 +8,7 @@ from ....schemas.word import Word
 from ....crud.group import crud_group
 from ....crud.word import crud_word
 from ..utils import SortOrder
+from ....config import settings
 
 router = APIRouter()
 
@@ -21,8 +22,22 @@ async def get_groups(
     """
     Get a paginated list of word groups
     """
-    skip = (page - 1) * 100
-    return crud_group.get_multi(db=db, skip=skip, limit=100)
+    skip = (page - 1) * settings.PAGE_SIZE
+    groups = crud_group.get_multi(
+        db,
+        skip=skip,
+        limit=settings.PAGE_SIZE
+    )
+    
+    return [
+        Group(
+            id=group.id,
+            name=group.name,
+            description=group.description,
+            words_count=len(group.words)
+        )
+        for group in groups
+    ]
 
 @router.get("/{group_id}/words", response_model=List[Word])
 async def get_group_words(

@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from .base import CRUDBase
 from ..models.group import Group
@@ -16,5 +16,21 @@ class CRUDGroup(CRUDBase[Group, GroupCreate, GroupBase]):
         db.commit()
         db.refresh(group)
         return group
+    
+    def get_multi(
+        self,
+        db: Session,
+        *,
+        skip: int = 0,
+        limit: int = 100
+    ) -> List[Group]:
+        """Override get_multi to ensure words relationship is loaded."""
+        return (
+            db.query(self.model)
+            .options(joinedload(self.model.words))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
 crud_group = CRUDGroup(Group)
