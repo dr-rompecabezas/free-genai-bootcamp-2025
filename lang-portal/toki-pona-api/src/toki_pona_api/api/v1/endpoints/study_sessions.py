@@ -35,9 +35,8 @@ async def create_word_review(
     if not crud_study_session.get(db=db, id=session_id):
         raise HTTPException(status_code=404, detail="Study session not found")
     
-    review_data = WordReviewCreate(
-        word_id=review.word_id,
-        correct=review.correct,
-        study_session_id=session_id
-    )
-    return crud_word_review.create(db=db, obj_in=review_data)
+    # Create review with session_id included in the input data
+    review_dict = review.model_dump()
+    review_dict["study_session_id"] = session_id
+    
+    return crud_word_review.create(db=db, obj_in=review_dict)
