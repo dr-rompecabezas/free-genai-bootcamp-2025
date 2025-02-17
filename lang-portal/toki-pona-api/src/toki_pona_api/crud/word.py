@@ -1,6 +1,6 @@
 from typing import List, Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy.orm import Session, selectinload
+from sqlalchemy import select, desc
 
 from .base import CRUDBase
 from ..models.word import Word
@@ -9,7 +9,12 @@ from ..api.v1.utils import SortOrder
 
 class CRUDWord(CRUDBase[Word, WordCreate, WordBase]):
     def get_by_toki_pona(self, db: Session, *, toki_pona: str) -> Optional[Word]:
-        return db.query(Word).filter(Word.toki_pona == toki_pona).first()
+        stmt = (
+            select(Word)
+            .where(Word.toki_pona == toki_pona)
+            .options(selectinload(Word.groups))
+        )
+        return db.execute(stmt).scalar_one_or_none()
 
     def get_by_group(
         self,
@@ -22,10 +27,12 @@ class CRUDWord(CRUDBase[Word, WordCreate, WordBase]):
         order: SortOrder = SortOrder.ASC
     ) -> List[Word]:
         """Get words in a group with sorting and pagination."""
-        query = (
-            db.query(Word)
+        # Create base query
+        stmt = (
+            select(Word)
             .join(Word.groups)
-            .filter(Word.groups.any(id=group_id))
+            .where(Word.groups.any(id=group_id))
+            .options(selectinload(Word.groups))
         )
         
         # Get the column to sort by
@@ -35,7 +42,9 @@ class CRUDWord(CRUDBase[Word, WordCreate, WordBase]):
         if order == SortOrder.DESC:
             sort_column = desc(sort_column)
         
-        return query.order_by(sort_column).offset(skip).limit(limit).all()
+        # Apply sorting, offset, and limit
+        stmt = stmt.order_by(sort_column).offset(skip).limit(limit)
+        return list(db.execute(stmt).scalars().all())
     
     def get_multi(
         self,
@@ -47,7 +56,8 @@ class CRUDWord(CRUDBase[Word, WordCreate, WordBase]):
         order: SortOrder = SortOrder.ASC
     ) -> List[Word]:
         """Override get_multi to support sorting."""
-        query = db.query(self.model)
+        # Create base query
+        stmt = select(self.model).options(selectinload(Word.groups))
         
         # Get the column to sort by
         sort_column = getattr(self.model, sort_by)
@@ -56,7 +66,9 @@ class CRUDWord(CRUDBase[Word, WordCreate, WordBase]):
         if order == SortOrder.DESC:
             sort_column = desc(sort_column)
         
-        return query.order_by(sort_column).offset(skip).limit(limit).all()
+        # Apply sorting, offset, and limit
+        stmt = stmt.order_by(sort_column).offset(skip).limit(limit)
+        return list(db.execute(stmt).scalars().all())
     
     def update_review_counts(self, db: Session, *, word_id: int, correct: bool) -> Word:
         word = self.get(db, id=word_id)

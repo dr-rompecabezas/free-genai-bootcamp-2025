@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class StudyActivityBase(BaseModel):
     name: str
@@ -10,8 +10,7 @@ class StudyActivityBase(BaseModel):
 class StudyActivity(StudyActivityBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class StudySessionBase(BaseModel):
     group_id: int
@@ -24,8 +23,7 @@ class StudySession(StudySessionBase):
     id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class WordReviewBase(BaseModel):
     word_id: int
@@ -39,5 +37,4 @@ class WordReview(WordReviewBase):
     study_session_id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

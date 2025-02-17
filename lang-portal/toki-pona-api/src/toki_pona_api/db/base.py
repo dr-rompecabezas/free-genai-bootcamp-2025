@@ -1,6 +1,9 @@
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import registry
+from sqlalchemy.orm import DeclarativeBase, registry
 
 # Create the SQLAlchemy declarative base
 mapper_registry = registry()
-Base = declarative_base(metadata=mapper_registry.metadata)
+
+class Base(DeclarativeBase):
+    """Base class for all SQLAlchemy models."""
+    registry = mapper_registry
+    metadata = mapper_registry.metadata

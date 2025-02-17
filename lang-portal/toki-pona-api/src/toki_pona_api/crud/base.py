@@ -1,7 +1,8 @@
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, selectinload
 
 from ..db.base import Base
 
@@ -17,15 +18,26 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.model = model
 
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == id).first()
+        stmt = (
+            select(self.model)
+            .where(self.model.id == id)
+            .options(selectinload("*"))
+        )
+        return db.execute(stmt).unique().scalar_one_or_none()
 
     def get_multi(
         self, db: Session, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
-        return db.query(self.model).offset(skip).limit(limit).all()
+        stmt = (
+            select(self.model)
+            .options(selectinload("*"))
+            .offset(skip)
+            .limit(limit)
+        )
+        return list(db.execute(stmt).unique().scalars().all())
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
-        obj_in_data = jsonable_encoder(obj_in)
+        obj_in_data = obj_in.model_dump() if isinstance(obj_in, BaseModel) else obj_in
         db_obj = self.model(**obj_in_data)
         db.add(db_obj)
         db.commit()
@@ -53,7 +65,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db_obj
 
     def remove(self, db: Session, *, id: int) -> ModelType:
-        obj = db.get(self.model, id)
+        stmt = (
+            select(self.model)
+            .where(self.model.id == id)
+            .options(selectinload("*"))
+        )
+        obj = db.execute(stmt).unique().scalar_one_or_none()
         if obj is None:
             raise ValueError(f"Object with id {id} not found")
         db.delete(obj)
