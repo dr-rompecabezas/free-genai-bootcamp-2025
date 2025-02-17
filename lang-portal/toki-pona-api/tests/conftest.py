@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from src.toki_pona_api.db.base import Base
-from src.toki_pona_api.db.session import get_db
+from src.toki_pona_api.dependencies import get_db
 from src.toki_pona_api.main import app
 from src.toki_pona_api.models.word import Word
 from src.toki_pona_api.models.group import Group

@@ -1,14 +1,15 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ....db.session import get_db
+from ....dependencies import get_db
+from ....crud.study_session import crud_study_session, crud_word_review
 from ....schemas.study_session import (
     StudySession,
     StudySessionCreate,
     WordReview,
     WordReviewCreate
 )
-from ....crud.study_session import crud_study_session, crud_word_review
 
 router = APIRouter()
 

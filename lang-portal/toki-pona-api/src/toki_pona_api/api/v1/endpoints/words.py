@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 
-from ....db.session import get_db
+from ....dependencies import get_db
 from ....schemas.word import Word
 from ....crud.word import crud_word
 from ..utils import SortOrder
