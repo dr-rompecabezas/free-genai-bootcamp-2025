@@ -13,21 +13,37 @@ def test_create_word(db_session):
     assert word.toki_pona == "moku"
     assert word.english == "food"
 
-def test_update_review_counts(db_session, sample_words):
-    """Test updating word review counts."""
-    # Get the actual word object from the database
-    word = db_session.query(Word).filter_by(id=sample_words[0]).first()
+def test_get_by_toki_pona(db_session, sample_words):
+    """Test retrieving a word by its toki pona name."""
+    # Get the actual word object first
+    word = crud_word.get(db_session, id=sample_words[0])
     
+    # Test get_by_toki_pona
+    found_word = crud_word.get_by_toki_pona(db_session, toki_pona=word.toki_pona)
+    assert found_word is not None
+    assert found_word.id == sample_words[0]
+    assert found_word.toki_pona == word.toki_pona
+
+def test_get_by_group(db_session, sample_group, sample_words):
+    """Test retrieving words by group ID."""
+    # Get words for the group
+    group_words = crud_word.get_by_group(db_session, group_id=sample_group)
+    assert len(group_words) > 0
+    assert all(word.id in sample_words for word in group_words)
+
+def test_update_review_counts(db_session, sample_words):
+    """Test updating word review counts using the CRUD method."""
+    word_id = sample_words[0]
+    word = crud_word.get(db_session, id=word_id)
     initial_correct = word.correct_count
     initial_wrong = word.wrong_count
     
-    # Update counts
-    word.correct_count += 1
-    word.wrong_count += 1
-    db_session.commit()
+    # Test correct review
+    updated_word = crud_word.update_review_counts(db_session, word_id=word_id, correct=True)
+    assert updated_word.correct_count == initial_correct + 1
+    assert updated_word.wrong_count == initial_wrong
     
-    # Refresh from DB
-    db_session.refresh(word)
-    
-    assert word.correct_count == initial_correct + 1
-    assert word.wrong_count == initial_wrong + 1
+    # Test incorrect review
+    updated_word = crud_word.update_review_counts(db_session, word_id=word_id, correct=False)
+    assert updated_word.correct_count == initial_correct + 1
+    assert updated_word.wrong_count == initial_wrong + 1
