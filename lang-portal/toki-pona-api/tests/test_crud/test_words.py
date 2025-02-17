@@ -23,6 +23,10 @@ def test_get_by_toki_pona(db_session, sample_words):
     assert found_word is not None
     assert found_word.id == sample_words[0]
     assert found_word.toki_pona == word.toki_pona
+    
+    # Test with non-existent word
+    non_existent_word = crud_word.get_by_toki_pona(db_session, toki_pona="nonexistentword")
+    assert non_existent_word is None
 
 def test_get_by_group(db_session, sample_group, sample_words):
     """Test retrieving words by group ID."""
@@ -30,6 +34,10 @@ def test_get_by_group(db_session, sample_group, sample_words):
     group_words = crud_word.get_by_group(db_session, group_id=sample_group)
     assert len(group_words) > 0
     assert all(word.id in sample_words for word in group_words)
+    
+    # Test with non-existent group
+    non_existent_group_words = crud_word.get_by_group(db_session, group_id=99999)
+    assert len(non_existent_group_words) == 0
 
 def test_update_review_counts(db_session, sample_words):
     """Test updating word review counts using the CRUD method."""
