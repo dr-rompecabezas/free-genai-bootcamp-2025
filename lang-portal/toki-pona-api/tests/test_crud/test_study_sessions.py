@@ -42,6 +42,10 @@ def test_get_sessions_by_group(db_session, sample_group, sample_activity):
     group_sessions = crud_study_session.get_by_group(db_session, group_id=sample_group)
     assert len(group_sessions) == 2
     assert all(s.group_id == sample_group for s in group_sessions)
+    
+    # Test with non-existent group
+    non_existent_group_sessions = crud_study_session.get_by_group(db_session, group_id=99999)
+    assert len(non_existent_group_sessions) == 0
 
 def test_create_study_activity(db_session):
     """Test creating a new study activity."""
@@ -66,6 +70,10 @@ def test_get_activity_by_name(db_session, sample_activity):
     assert found_activity.id == sample_activity
     assert found_activity.name == "Flashcards"
     assert found_activity.url == "/apps/flashcards"
+    
+    # Test with non-existent activity name
+    non_existent_activity = crud_study_activity.get_by_name(db_session, name="NonExistentActivity")
+    assert non_existent_activity is None
 
 def test_create_word_review(db_session, sample_group, sample_activity, sample_words):
     """Test creating a word review for a study session."""
@@ -113,3 +121,7 @@ def test_get_reviews_by_session(db_session, sample_group, sample_activity, sampl
     session_reviews = crud_word_review.get_by_session(db_session, session_id=session.id)
     assert len(session_reviews) == len(sample_words)
     assert all(r.study_session_id == session.id for r in session_reviews)
+    
+    # Test with non-existent session
+    non_existent_session_reviews = crud_word_review.get_by_session(db_session, session_id=99999)
+    assert len(non_existent_session_reviews) == 0
