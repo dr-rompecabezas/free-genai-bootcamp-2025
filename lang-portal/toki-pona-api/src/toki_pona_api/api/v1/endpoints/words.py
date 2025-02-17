@@ -20,7 +20,7 @@ async def get_words(
     Get a paginated list of Toki Pona words with review statistics
     """
     skip = (page - 1) * 100
-    return crud_word.get_multi(db=db, skip=skip, limit=100)
+    return crud_word.get_multi(db=db, skip=skip, limit=100, sort_by=sort_by, order=order)
 
 @router.get("/{word_id}", response_model=Word)
 async def get_word(
