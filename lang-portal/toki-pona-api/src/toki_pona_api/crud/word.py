@@ -11,13 +11,31 @@ class CRUDWord(CRUDBase[Word, WordCreate, WordBase]):
     def get_by_toki_pona(self, db: Session, *, toki_pona: str) -> Optional[Word]:
         return db.query(Word).filter(Word.toki_pona == toki_pona).first()
 
-    def get_by_group(self, db: Session, *, group_id: int) -> List[Word]:
-        return (
+    def get_by_group(
+        self,
+        db: Session,
+        *,
+        group_id: int,
+        skip: int = 0,
+        limit: int = 100,
+        sort_by: str = "toki_pona",
+        order: SortOrder = SortOrder.ASC
+    ) -> List[Word]:
+        """Get words in a group with sorting and pagination."""
+        query = (
             db.query(Word)
             .join(Word.groups)
             .filter(Word.groups.any(id=group_id))
-            .all()
         )
+        
+        # Get the column to sort by
+        sort_column = getattr(Word, sort_by)
+        
+        # Apply sort order
+        if order == SortOrder.DESC:
+            sort_column = desc(sort_column)
+        
+        return query.order_by(sort_column).offset(skip).limit(limit).all()
     
     def get_multi(
         self,
