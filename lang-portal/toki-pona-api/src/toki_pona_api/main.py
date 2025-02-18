@@ -5,7 +5,7 @@ from .api.v1.router import api_router
 from .config import settings
 
 app = FastAPI(
-    title="Toki Pona API",
+    title=settings.PROJECT_NAME,
     description="API for learning Toki Pona language",
     version="1.0.0"
 )
@@ -20,4 +20,4 @@ app.add_middleware(
 )
 
 # Include API router
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix=settings.API_V1_PREFIX)
