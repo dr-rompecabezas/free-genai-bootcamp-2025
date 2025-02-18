@@ -2,3 +2,5 @@
 .python-version
 .secrets
 .actrc
+codealike.json
+.vscode
