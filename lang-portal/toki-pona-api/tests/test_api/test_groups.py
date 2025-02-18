@@ -73,3 +73,20 @@ def test_get_nonexistent_group_words(client):
     response = client.get("/api/v1/groups/999/words")
     assert response.status_code == 404
     assert response.json()["detail"] == "Group not found"
+
+def test_get_group(client, sample_group):
+    """Test getting a specific group by ID."""
+    # Test getting existing group
+    response = client.get(f"/api/v1/groups/{sample_group}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "Basic Words"
+    assert data["words_count"] == 2
+    assert "description" in data
+    assert "id" in data
+
+def test_get_nonexistent_group(client):
+    """Test getting a non-existent group."""
+    response = client.get("/api/v1/groups/999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Group not found"

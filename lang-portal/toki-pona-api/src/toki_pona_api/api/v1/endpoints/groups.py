@@ -41,6 +41,21 @@ async def get_groups(
         for group in groups
     ]
 
+@router.get("/{group_id}", response_model=Group)
+async def get_group(group_id: int, db: Session = Depends(get_db)):
+    """
+    Get a specific word group by ID
+    """
+    group = crud_group.get(db=db, id=group_id)
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    return Group(
+        id=group.id,
+        name=group.name,
+        description=group.description,
+        words_count=len(group.words)
+    )
+
 @router.get("/{group_id}/words", response_model=List[Word])
 async def get_group_words(
     group_id: int,
