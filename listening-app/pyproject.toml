@@ -1,0 +1,12 @@
+[project]
+name = "toki-pona-ai"
+version = "0.1.0"
+description = "Toki Pona AI Learning Prototype"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.63.2",
+    "python-dotenv>=1.0.1",
+    "ruff>=0.9.7",
+    "streamlit>=1.42.2",
+]
