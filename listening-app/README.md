@@ -20,7 +20,7 @@ An interactive learning tool that helps you practice Toki Pona translations with
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/dr-rompecabezas/free-genai-bootcamp-2025)
    cd toki-pona-ai
    ```
 
