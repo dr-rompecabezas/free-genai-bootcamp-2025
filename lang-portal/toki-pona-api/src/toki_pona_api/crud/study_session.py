@@ -1,6 +1,5 @@
 from typing import List
 from sqlalchemy.orm import Session
-from datetime import datetime
 
 from .base import CRUDBase
 from ..models.study_session import StudySession, StudyActivity, WordReview

@@ -1,10 +1,8 @@
 import pytest
-from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import FlushError
 
 from src.toki_pona_api.crud.group import crud_group
-from src.toki_pona_api.schemas.group import GroupCreate, GroupBase
-from src.toki_pona_api.models.group import Group
+from src.toki_pona_api.schemas.group import GroupCreate
 from src.toki_pona_api.models.word import Word
 from src.toki_pona_api.api.v1.utils import SortOrder
 

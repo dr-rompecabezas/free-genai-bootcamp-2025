@@ -1,13 +1,10 @@
-import pytest
 from datetime import datetime
-from sqlalchemy.orm import Session
 
 from src.toki_pona_api.crud.study_session import (
     crud_study_session,
     crud_study_activity,
     crud_word_review
 )
-from src.toki_pona_api.models.study_session import StudyActivity, StudySession, WordReview
 from src.toki_pona_api.schemas.study_session import (
     StudySessionCreate,
     StudyActivityBase,

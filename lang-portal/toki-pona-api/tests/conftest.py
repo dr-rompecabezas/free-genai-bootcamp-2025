@@ -9,7 +9,7 @@ from src.toki_pona_api.dependencies import get_db
 from src.toki_pona_api.main import app
 from src.toki_pona_api.models.word import Word
 from src.toki_pona_api.models.group import Group
-from src.toki_pona_api.models.study_session import StudyActivity, StudySession
+from src.toki_pona_api.models.study_session import StudyActivity
 
 # Use in-memory SQLite for testing
 SQLALCHEMY_DATABASE_URL = "sqlite://"

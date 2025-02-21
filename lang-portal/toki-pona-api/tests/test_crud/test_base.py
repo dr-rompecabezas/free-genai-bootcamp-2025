@@ -1,7 +1,4 @@
 import pytest
-from typing import Dict, Any
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
 
 from src.toki_pona_api.crud.base import CRUDBase
 from src.toki_pona_api.models.word import Word

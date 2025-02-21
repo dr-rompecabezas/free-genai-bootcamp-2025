@@ -1,5 +1,4 @@
 from src.toki_pona_api.crud import crud_word
-from src.toki_pona_api.models import Word
 from src.toki_pona_api.api.v1.utils import SortOrder
 
 def test_create_word(db_session):
