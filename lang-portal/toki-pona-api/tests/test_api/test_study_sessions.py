@@ -38,7 +38,7 @@ def test_create_word_review(client, sample_words, sample_group, sample_activity)
     data = review_response.json()
     assert data["word_id"] == sample_words[0]
     assert data["study_session_id"] == session_id
-    assert data["correct"] == True
+    assert data["correct"]
     
     # Test with non-existent session
     error_response = client.post(
