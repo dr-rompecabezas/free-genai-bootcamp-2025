@@ -18,12 +18,14 @@ An interactive learning tool that helps you practice Toki Pona translations with
 ## Setup
 
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    cd toki-pona-ai
    ```
 
 2. Create and activate a Python virtual environment:
+
    ```bash
    python -m venv .venv
    source .venv/bin/activate  # On Unix/macOS
@@ -32,13 +34,15 @@ An interactive learning tool that helps you practice Toki Pona translations with
    ```
 
 3. Install dependencies:
-   
+
    Using `uv` (recommended):
+
    ```bash
    uv sync
    ```
-   
+
    Or using `pip`:
+
    ```bash
    pip install pip-tools
    pip-compile pyproject.toml  # Generate requirements.txt from pyproject.toml
@@ -46,13 +50,15 @@ An interactive learning tool that helps you practice Toki Pona translations with
    ```
 
 4. Create a `.env` file in the project root and add your OpenAI API key:
-   ```
+
+   ```text
    OPENAI_API_KEY=your_api_key_here
    ```
 
 ## Running the App
 
 Start the Streamlit app:
+
 ```bash
 python -m streamlit run app.py
 ```
