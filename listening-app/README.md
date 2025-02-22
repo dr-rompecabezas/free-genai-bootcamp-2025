@@ -1,13 +1,17 @@
 # Toki Pona AI Learning Prototype
 
-An interactive learning tool that helps you practice Toki Pona translations with AI-powered feedback and audio generation.
+An interactive learning tool that helps you practice Toki Pona translations with AI-powered feedback, audio generation, and comprehension quizzes.
 
 ## Features
 
 - Watch an introductory Toki Pona lesson
 - Practice translating Toki Pona sentences to English
-- Listen to AI-generated pronunciations
-- Get instant feedback on your translations using GPT-4
+  - Listen to AI-generated pronunciations
+  - Get instant feedback on your translations using GPT-4
+- Test your understanding with AI-generated quizzes
+  - Multiple choice questions based on lesson content
+  - Instant scoring and answer explanations
+  - Option to try different quiz sets
 
 ## Prerequisites
 
@@ -71,6 +75,10 @@ The app will open in your default web browser. If it doesn't open automatically,
 2. Listen to the randomly selected Toki Pona sentence
 3. Enter your English translation in the text input
 4. Get instant feedback on your translation accuracy
+
+## Credits
+
+The Toki Pona lesson video is created by [jan Misali](https://www.youtube.com/@HBMmaster). If you enjoy their content, consider supporting them on [Patreon](https://patreon.com/hbmmaster).
 
 ## Note
 
