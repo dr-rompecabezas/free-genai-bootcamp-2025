@@ -9,4 +9,5 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "ruff>=0.9.7",
     "streamlit>=1.42.2",
+    "watchdog>=6.0.0",
 ]
