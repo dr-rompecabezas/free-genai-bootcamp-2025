@@ -42,22 +42,49 @@ def generate_audio(text):
 
 
 def check_translation(toki_pona_sentence, user_translation):
-    """Evaluate user's English translation using GPT."""
+    """Evaluate user's English translation using GPT, with key word definitions as context."""
+
     expected_translation = toki_pona_sentences.get(
         toki_pona_sentence, "No reference available."
     )
 
-    prompt = (
-        f"Evaluate the accuracy of this Toki Pona translation:\n\n"
-        f"Toki Pona: {toki_pona_sentence}\n"
-        f"User's Translation: {user_translation}\n"
-        f"Expected Translation: {expected_translation}\n\n"
-        f"Provide feedback: is the translation correct? If incorrect, suggest improvements."
+    toki_pona_vocab = {
+        "toki": "communicate",
+        "pona": "good",
+        "ike": "bad",
+        "jan": "person",
+        "li": "[verb-marking particle]",
+        "moku": "food; eat",
+        "lape": "sleep",
+        "olin": "love",
+        "ona": "them, her, him, it",
+        "mi": "me, us",
+        "sina": "you",
+    }
+
+    # Format vocabulary for better readability in the prompt
+    vocab_context = "\n".join(
+        [f"{word}: {meaning}" for word, meaning in toki_pona_vocab.items()]
     )
+
+    system_prompt = (
+        f"Evaluate the accuracy of the user's Toki Pona translation to English:\n\n"
+        f"The user has listened to the following Toki Pona sentence: {toki_pona_sentence}\n"
+        f"This is the expected translation: {expected_translation}\n\n"
+        f"Key Word Definitions:\n{vocab_context}\n\n"
+        f"Provide feedback on the accuracy of the user's translation, using the vocabulary meanings above. "
+        f"If the translation is incorrect, suggest a hint before revealing the correct answer."
+    )
+
+    user_input = f"My English Translation: {user_translation}\n"
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4-turbo", messages=[{"role": "user", "content": prompt}]
+            model="gpt-4-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input},
+            ],
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
@@ -78,16 +105,19 @@ st.write(
 st.header("Step 2: Listening Activity")
 st.write("Listen to the sentence and enter your translation:")
 
+# Ensure sentence stays the same for the current attempt
+if "selected_sentence" not in st.session_state:
+    st.session_state.selected_sentence = random.choice(list(toki_pona_sentences.keys()))
+
 # Generate and play audio
-selected_sentence = random.choice(list(toki_pona_sentences.keys()))
-audio_file = generate_audio(selected_sentence)
+audio_file = generate_audio(st.session_state.selected_sentence)
 if audio_file:
     st.audio(audio_file, format="audio/mp3")
 
-# User input
+# User input and feedback
 user_translation = st.text_input("Your English translation:")
 
 if user_translation:
-    feedback = check_translation(selected_sentence, user_translation)
+    feedback = check_translation(st.session_state.selected_sentence, user_translation)
     st.write("### Feedback:")
     st.write(feedback)
