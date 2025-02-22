@@ -1,6 +1,6 @@
 # GenAI Bootcamp 2025: Toki Pona AI-Enhanced Language Learning Experiments
 
-This repository contains assignments completed during ExamPro's free GenAI Bootcamp. Be aware that **this code is not meant for production use**. The releases and git tags are meant to serve as a record of progress through the boot camp. Similarly, GitHub issues have been used to help instructors quickly reference the commits related to a particular assignment.
+This repository contains assignments completed during ExamPro's free GenAI Bootcamp. Be aware that **this code is not meant for production use**. The git tags only serve as a record of progress through the bootcamp. Similarly, GitHub issues have been used to help instructors quickly reference the commits related to a particular assignment.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -15,8 +15,6 @@ This repository contains assignments completed during ExamPro's free GenAI Bootc
 - [`/dev-tools` directory](#dev-tools-directory)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-This README explains the top-level repository structure. Additional README files are provided throughout the repository to provide additional context.
-
 ## `/listening-app` directory
 
 The `listening-app` directory contains a Streamlit-based application featuring:
