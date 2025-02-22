@@ -152,7 +152,7 @@ def check_translation(toki_pona_sentence, user_translation):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input},
@@ -164,39 +164,193 @@ def check_translation(toki_pona_sentence, user_translation):
         return f"Error checking translation: {e}"
 
 
+def generate_quiz_questions(text_content, num_questions=3):
+    """Generate multiple choice quiz questions based on the content."""
+    prompt = f"""
+    Create exactly {num_questions} multiple choice questions about Toki Pona based on this lesson.
+    Return them in this exact format - a Python list of dictionaries:
+    
+    [
+        {{
+            "question": "Question 1 text here?",
+            "options": [
+                "a) First option",
+                "b) Second option",
+                "c) Third option",
+                "d) Fourth option"
+            ],
+            "correct_answer": 0
+        }},
+        {{
+            "question": "Question 2 text here?",
+            "options": [
+                "a) First option",
+                "b) Second option",
+                "c) Third option",
+                "d) Fourth option"
+            ],
+            "correct_answer": 1
+        }}
+    ]
+    
+    Important:
+    - Use exactly this format with proper Python syntax
+    - Include exactly 4 options per question
+    - Use 'correct_answer' as a number (0-3) indicating the index of the correct option
+    - Make sure all brackets and braces are properly closed
+    - Do not include any additional text or explanations, only the list
+    
+    Lesson content:
+    {text_content}
+    """
+    
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "You are a quiz generator. Always respond with a properly formatted Python list of dictionaries containing quiz questions. Do not include any other text."
+                },
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7
+        )
+        
+        response_text = response.choices[0].message.content.strip()
+        
+        # Remove any markdown code block markers
+        response_text = response_text.replace('```python', '').replace('```', '')
+        
+        # Clean up whitespace and try to parse
+        response_text = response_text.strip()
+        
+        # Try to clean up common formatting issues
+        response_text = response_text.replace('\n', ' ').replace('  ', ' ')
+        
+        # Safely evaluate the response to get the list of questions
+        import ast
+        quiz_questions = ast.literal_eval(response_text)
+        
+        # Validate the structure of the questions
+        for q in quiz_questions:
+            if not isinstance(q, dict):
+                raise ValueError("Question is not a dictionary")
+            if not all(k in q for k in ["question", "options", "correct_answer"]):
+                raise ValueError("Question missing required fields")
+            if not isinstance(q["options"], list) or len(q["options"]) != 4:
+                raise ValueError("Question must have exactly 4 options")
+            if not isinstance(q["correct_answer"], int) or q["correct_answer"] not in range(4):
+                raise ValueError("correct_answer must be 0-3")
+        
+        return quiz_questions
+    except Exception as e:
+        st.error(f"Error generating questions: {str(e)}")
+        return []
+
+
 # Streamlit UI
 st.title("Toki Pona AI Learning Prototype")
 
 # Embedded lesson video
-st.header("Step 1: Watch the Lesson")
+st.header("Watch the Lesson")
 st.video("https://www.youtube.com/watch?v=2EZihKCB9iw")
 st.write(
-    "Watch this short introduction to Toki Pona before proceeding to the listening activity."
+    "Watch this short introduction to Toki Pona before proceeding to the activities below."
 )
 
-# Listening Exercise
-st.header("Step 2: Listening Activity")
-st.write("Listen to the sentence and enter your translation:")
+# Activity selector using tabs
+st.header("Practice Activities")
+listening_tab, quiz_tab = st.tabs(["Listening Practice", "Comprehension Quiz"])
 
-# Ensure sentence stays the same for the current attempt
-if "selected_sentence" not in st.session_state:
-    st.session_state.selected_sentence = random.choice(list(toki_pona_sentences.keys()))
+# Listening Practice Tab
+with listening_tab:
+    st.subheader("Listening Activity")
+    st.write("Listen to the sentence and enter your translation:")
 
-# Generate and play audio
-audio_file = generate_audio(st.session_state.selected_sentence)
-if audio_file:
-    st.audio(audio_file, format="audio/mp3")
+    # Ensure sentence stays the same for the current attempt
+    if "selected_sentence" not in st.session_state:
+        st.session_state.selected_sentence = random.choice(list(toki_pona_sentences.keys()))
 
-# Debugging
-# st.write("### Debugging:")
-# st.write(f"Selected sentence: {st.session_state.selected_sentence}")
-# st.write(f"Valid translations: {toki_pona_sentences[st.session_state.selected_sentence]}")
-# st.write(f"Context: {toki_pona_sentences[st.session_state.selected_sentence]['context']}")
+    # Generate and play audio
+    audio_file = generate_audio(st.session_state.selected_sentence)
+    if audio_file:
+        st.audio(audio_file, format="audio/mp3")
+        os.unlink(audio_file)  # Clean up the temporary file
 
-# User input and feedback
-user_translation = st.text_input("Your English translation:")
+    # User input and feedback
+    user_translation = st.text_input(
+        "Your English translation:",
+        key="translation_input",
+        help="Type your English translation here",
+    )
 
-if user_translation:
-    feedback = check_translation(st.session_state.selected_sentence, user_translation)
-    st.write("### Feedback:")
-    st.write(feedback)
+    # Check translation when Enter is pressed (when input changes)
+    if user_translation:
+        feedback = check_translation(st.session_state.selected_sentence, user_translation)
+        st.session_state.feedback = feedback
+
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("Check Translation"):
+            feedback = check_translation(st.session_state.selected_sentence, user_translation)
+            st.session_state.feedback = feedback
+    
+    with col2:
+        if st.button("Try Another Sentence"):
+            # Update selected sentence, excluding current one
+            available_sentences = list(toki_pona_sentences.keys())
+            available_sentences.remove(st.session_state.selected_sentence)
+            st.session_state.selected_sentence = random.choice(available_sentences)
+            st.session_state.feedback = None  # Clear previous feedback
+            st.rerun()
+
+    # Display feedback if it exists
+    if hasattr(st.session_state, 'feedback') and st.session_state.feedback:
+        st.write("### Feedback:")
+        st.write(st.session_state.feedback)
+
+# Quiz Tab
+with quiz_tab:
+    st.subheader("Test Your Understanding")
+    st.write("Answer these questions about the Toki Pona lesson:")
+
+    if 'quiz_questions' not in st.session_state:
+        st.session_state.quiz_questions = generate_quiz_questions(lesson_transcript)
+        st.session_state.quiz_submitted = False
+        st.session_state.quiz_score = 0
+
+    if st.session_state.quiz_questions:
+        with st.form("quiz_form"):
+            user_answers = []
+            for i, q in enumerate(st.session_state.quiz_questions):
+                st.write(f"\n**Question {i+1}:** {q['question']}")
+                answer = st.radio(f"Select your answer for question {i+1}:", 
+                                q['options'],
+                                key=f"q_{i}")
+                user_answers.append(q['options'].index(answer))
+            
+            submit = st.form_submit_button("Submit Quiz")
+            
+            if submit and not st.session_state.quiz_submitted:
+                score = sum(1 for ua, q in zip(user_answers, st.session_state.quiz_questions) 
+                          if ua == q['correct_answer'])
+                st.session_state.quiz_score = score
+                st.session_state.quiz_submitted = True
+        
+        if st.session_state.quiz_submitted:
+            st.success(f"Your score: {st.session_state.quiz_score}/{len(st.session_state.quiz_questions)}")
+            
+            # Show correct answers
+            st.write("\n### Answer Key:")
+            for i, q in enumerate(st.session_state.quiz_questions):
+                st.write(f"**Question {i+1}:** {q['options'][q['correct_answer']]}")
+
+            # Add button to try another quiz
+            if st.button("Try Another Quiz"):
+                st.session_state.quiz_questions = generate_quiz_questions(lesson_transcript)
+                st.session_state.quiz_submitted = False
+                st.session_state.quiz_score = 0
+                st.rerun()
+    else:
+        st.error("Failed to generate quiz questions. Please try again.")
