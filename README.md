@@ -4,6 +4,17 @@ This repository contains assignments completed during ExamPro's free GenAI Bootc
 
 This README explains the top-level repository structure. Additional README files are provided throughout the repository to provide additional context.
 
+## `/listening-app` directory
+
+The `listening-app` directory contains a Streamlit-based application featuring:
+
+- Interactive translation practice with AI-powered feedback
+- Text-to-speech capabilities using OpenAI's TTS API
+- GPT prompt construction for context-dependent translations
+- Utility tool for processing YouTube transcripts to support NLP tasks
+
+The application demonstrates practical use of Large Language Models (GPT) and Text-to-Speech technology in language education.
+
 ## `/lang-portal` directory
 
 This directory contains the source code for the language learning platform. It has been rebuilt twice. The current backend is a FastAPI application with 100% test coverage for the endpoints, CRUD operations, Pydantic models, and SQLAlchemy models.
