@@ -174,16 +174,36 @@ class SitelenPonaTeacher:
             with st.expander("Debug: Shape Analysis", expanded=True):
                 st.write(f"Raw matchShapes similarity score: {similarity:.6f}")
             
-            # More aggressive exponential decay for shape similarity
-            shape_score = np.exp(-50 * similarity)  # Much steeper decay
-            feedback["shape_similarity"] = min(shape_score, 1.0)  # Cap at 100%
+            # Based on empirical testing with Sitelen Pona glyphs:
+            # similarity < 1.0 = very good match (>80%)
+            # similarity 1.0-3.0 = decent match (40-80%)
+            # similarity > 3.0 = poor match (<40%)
+            
+            # Use a piece-wise function for more intuitive scoring
+            if similarity < 1.0:
+                # Very good matches: map [0, 1] to [80%, 100%]
+                shape_score = 0.8 + (0.2 * (1 - similarity))
+            elif similarity < 3.0:
+                # Decent matches: map [1, 3] to [40%, 80%]
+                shape_score = 0.4 + (0.4 * (3 - similarity) / 2)
+            else:
+                # Poor matches: exponential decay for scores below 40%
+                shape_score = 0.4 * np.exp(-0.3 * (similarity - 3))
+            
+            # Add more debug info about score conversion
+            with st.expander("Debug: Score Conversion", expanded=True):
+                st.write(f"Raw similarity: {similarity:.6f}")
+                st.write(f"Score category: {'Very good' if similarity < 1.0 else 'Decent' if similarity < 3.0 else 'Poor'}")
+                st.write(f"Final score: {shape_score:.2%}")
+                
+            feedback["shape_similarity"] = shape_score
 
             # Size comparison with stricter scoring
             area_drawing = cv2.contourArea(main_contour_drawing)
             area_target = cv2.contourArea(main_contour_target)
             area_ratio = min(area_drawing, area_target) / max(area_drawing, area_target)
-            # Apply a power function to make the size score more sensitive
-            size_ratio = area_ratio ** 2  # Square the ratio to make it more strict
+            # Make size scoring more lenient
+            size_ratio = np.sqrt(area_ratio)  # Use square root instead of square to be more lenient
             feedback["size_accuracy"] = size_ratio
 
             # Position analysis with normalized distance
@@ -196,17 +216,13 @@ class SitelenPonaTeacher:
                 cx_target = moments_target["m10"] / moments_target["m00"]
                 cy_target = moments_target["m01"] / moments_target["m00"]
 
-                # Debug: Show centroid positions
-                with st.expander("Debug: Position Analysis", expanded=True):
-                    st.write(f"Drawing centroid: ({cx_drawing:.2f}, {cy_drawing:.2f})")
-                    st.write(f"Template centroid: ({cx_target:.2f}, {cy_target:.2f})")
-
                 # Calculate normalized distance (as a fraction of image size)
                 img_diagonal = np.sqrt(100 * 100 + 100 * 100)  # Image is 100x100
                 position_error = np.sqrt(
                     (cx_drawing - cx_target) ** 2 + (cy_drawing - cy_target) ** 2
                 )
-                position_score = max(0, 1 - (position_error / (img_diagonal * 0.2)))  # More sensitive to position
+                # Make position scoring more lenient
+                position_score = max(0, 1 - (position_error / (img_diagonal * 0.3)))  # Increased from 0.2 to 0.3
                 feedback["position_accuracy"] = position_score
 
         return feedback

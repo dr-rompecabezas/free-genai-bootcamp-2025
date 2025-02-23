@@ -80,3 +80,38 @@ The `scripts/` directory contains the original web scraping and image processing
 ## License
 
 The template images are derived from content available under CC BY-SA 3.0 license from the Sona Pona Wiki.
+
+## Attempts
+
+Several approaches were explored to recognize and evaluate hand-drawn Sitelen Pona characters. The main challenge was finding a computer vision technique that could effectively compare simple geometric shapes while being tolerant of natural variations in human drawing. Each attempt revealed different aspects of the problem and helped inform potential future solutions.
+
+### 1. Template Matching (`cv2_matchtemplate.app.py`)
+
+First attempt using OpenCV's `cv2.matchTemplate()`. This approach:
+
+- Used template matching to find the best match between the drawn image and template
+- Pre-processed images to standardize size and center content
+- Challenges: Too sensitive to exact positioning and scaling, didn't handle stylistic variations well
+
+### 2. Feature Matching (`cv2_orb.app.py`)
+
+Second attempt using ORB (Oriented FAST and Rotated BRIEF) feature detection:
+
+- Detected and matched keypoints between drawn image and template
+- Used feature matching to calculate similarity score
+- Challenges: Sitelen Pona characters are too simple for reliable feature detection, resulted in inconsistent keypoint matching
+
+### 3. Shape Matching (`cv2_matchshape.app.py`)
+
+Third attempt using `cv2.matchShapes()`:
+
+- Compared contours using Hu Moments
+- Implemented preprocessing to isolate and normalize shapes
+- Added debug visualizations for contours and centroids
+- Challenges: Similarity scores didn't align with human perception, adjusting scoring ranges didn't solve fundamental matching issues
+
+Each approach revealed different limitations in computer vision techniques when applied to simple, geometric shapes like Sitelen Pona characters. A new approach might need to consider:
+
+- Custom shape descriptors tailored to Sitelen Pona's geometric nature
+- Multiple comparison metrics combined
+- Machine learning-based approach trained on variations of each character
