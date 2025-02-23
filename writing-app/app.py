@@ -101,9 +101,20 @@ def main():
     target_char = st.selectbox("Select character to practice:", available_chars)
 
     if target_char:
-        # Show target character
-        st.subheader("Target Character:")
-        st.image(teacher.templates[target_char], caption=target_char, width=200)
+        # Create two columns for the reveal button and the character display
+        col1, col2 = st.columns([1, 3])
+
+        with col1:
+            show_target = st.button("Reveal Target")
+
+        with col2:
+            # Only show if reveal is clicked
+            if show_target:
+                st.image(teacher.templates[target_char], caption=target_char, width=200)
+            else:
+                st.write(
+                    "Character hidden - test your memory! Click 'Reveal Target' to see it."
+                )
 
         # Drawing canvas
         st.write("Draw the character:")
@@ -117,11 +128,22 @@ def main():
             key="canvas",
         )
 
-        if canvas_result.image_data is not None and st.button("Check Drawing"):
+        check_col1, check_col2 = st.columns([1, 3])
+        with check_col1:
+            check_button = st.button("Check Drawing")
+
+        if canvas_result.image_data is not None and check_button:
             # Analyze drawing
             feedback = teacher.analyze_drawing(canvas_result.image_data, target_char)
 
             if feedback:
+                # Show target character alongside feedback if it wasn't already revealed
+                if not show_target:
+                    st.subheader("Target Character:")
+                    st.image(
+                        teacher.templates[target_char], caption=target_char, width=200
+                    )
+
                 # Display feedback with visual indicators
                 st.subheader("Feedback:")
 
@@ -169,6 +191,7 @@ def main():
                     st.write("Good attempt! Focus on refining the details.")
                 else:
                     st.write("Excellent work! You've mastered this character!")
+                    st.balloons()
 
 
 if __name__ == "__main__":
