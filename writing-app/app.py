@@ -6,7 +6,6 @@ from PIL import Image
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 
-
 class SitelenPonaRecognizer:
     def __init__(self, templates_dir='templates'):
         """Initialize with a directory of template images"""
@@ -19,16 +18,21 @@ class SitelenPonaRecognizer:
         for template_file in template_path.glob('*.png'):
             char_name = template_file.stem
             template = cv2.imread(str(template_file), cv2.IMREAD_GRAYSCALE)
+            if template is None:
+                st.error(f"Failed to load template: {template_file}")
+                continue
+                
             # Store preprocessed template
-            self.templates[char_name] = self.preprocess_image(template)
+            processed = self.preprocess_image(template)
+            self.templates[char_name] = processed
             
     def preprocess_image(self, image):
         """Preprocess image for comparison"""
         if len(image.shape) == 3:
             image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-            
-        # Threshold to create binary image
-        _, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+                        
+        # Threshold to create binary image (inverted for black-on-white)
+        _, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY_INV)
         
         # Resize to standard size
         standard_size = (100, 100)
@@ -49,44 +53,64 @@ class SitelenPonaRecognizer:
             
             M = np.float32([[1, 0, translation_x], [0, 1, translation_y]])
             centered = cv2.warpAffine(resized, M, standard_size)
+                        
             return centered
         return resized
 
     def compare_images(self, img1, img2):
-        """Compare two preprocessed images and return similarity score"""
-        scores = []
-        
-        # Method 1: Template matching with CCOEFF_NORMED
+        """Compare two preprocessed images using a combination of template matching and contour similarity"""
+        # 1. Template matching score
         result = cv2.matchTemplate(img1, img2, cv2.TM_CCOEFF_NORMED)
-        scores.append(np.max(result) * 0.4)  # 40% weight
+        template_score = np.max(result)
         
-        # Method 2: SQDIFF_NORMED (converted to similarity)
-        result = cv2.matchTemplate(img1, img2, cv2.TM_SQDIFF_NORMED)
-        scores.append((1 - np.min(result)) * 0.3)  # 30% weight
+        # 2. Contour matching score
+        contours1, _ = cv2.findContours(img1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours2, _ = cv2.findContours(img2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
-        # Method 3: Check with slight rotations
-        max_rotation_score = 0
-        for angle in [-10, -5, 0, 5, 10]:
-            matrix = cv2.getRotationMatrix2D((img1.shape[1]/2, img1.shape[0]/2), angle, 1)
-            rotated = cv2.warpAffine(img1, matrix, (img1.shape[1], img1.shape[0]))
-            result = cv2.matchTemplate(rotated, img2, cv2.TM_CCOEFF_NORMED)
-            max_rotation_score = max(max_rotation_score, np.max(result))
-        scores.append(max_rotation_score * 0.3)  # 30% weight
+        if not contours1 or not contours2:
+            return 0
+            
+        # Get main contours
+        cnt1 = max(contours1, key=cv2.contourArea)
+        cnt2 = max(contours2, key=cv2.contourArea)
         
-        return sum(scores)
+        # Compare contour shapes
+        match_score = cv2.matchShapes(cnt1, cnt2, cv2.CONTOURS_MATCH_I2, 0)
+        # Convert to similarity score (lower distance = higher similarity)
+        contour_score = 1 / (1 + match_score)
+        
+        # Combine scores with equal weights
+        final_score = (template_score + contour_score) / 2
+                
+        return final_score
 
     def recognize(self, drawn_image, threshold=0.5):
         """Recognize drawn character by comparing with templates"""
+        # Debug: Show the raw input image
+        st.write("Raw input:")
+        st.image(drawn_image, caption="Input Image", width=100)
+        
         processed_input = self.preprocess_image(drawn_image)
+        
+        # Debug: Show the processed image
+        st.write("After preprocessing:")
+        st.image(processed_input, caption="Processed Image", width=100)
         
         best_match = None
         best_score = 0
+        all_scores = {}
         
+        # Compare with each template
         for char_name, template in self.templates.items():
             score = self.compare_images(processed_input, template)
+            all_scores[char_name] = score
             if score > best_score:
                 best_score = score
                 best_match = char_name
+        
+        # Debug: Show all template scores
+        with st.expander("View all template scores", expanded=False):
+            st.write(all_scores)
         
         if best_score >= threshold:
             return best_match, best_score
@@ -122,7 +146,7 @@ def main():
             if char:
                 st.success(f"Recognized as: {char} (Confidence: {confidence:.2f})")
                 # Show reference image
-                st.image(recognizer.templates[char], caption=f"Reference {char}")
+                st.image(recognizer.templates[char], caption=f"Reference {char}", width=100)
             else:
                 st.warning(f"No match found (Best match confidence: {confidence:.2f})")
                 
@@ -130,7 +154,7 @@ def main():
         uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Image", use_container_width=True)
+            st.image(image, caption="Uploaded Image", width=100)
             
             if st.button("Check Character"):
                 image_array = np.array(image)
@@ -138,7 +162,7 @@ def main():
                 
                 if char:
                     st.success(f"Recognized as: {char} (Confidence: {confidence:.2f})")
-                    st.image(recognizer.templates[char], caption=f"Reference {char}")
+                    st.image(recognizer.templates[char], caption=f"Reference {char}", width=100)
                 else:
                     st.warning(f"No match found (Best match confidence: {confidence:.2f})")
                     
@@ -146,7 +170,7 @@ def main():
         picture = st.camera_input("Take a picture")
         if picture:
             image = Image.open(picture)
-            st.image(image, caption="Captured Image", use_container_width=True)
+            st.image(image, caption="Captured Image", width=100)
             
             if st.button("Check Character"):
                 image_array = np.array(image)
@@ -154,7 +178,7 @@ def main():
                 
                 if char:
                     st.success(f"Recognized as: {char} (Confidence: {confidence:.2f})")
-                    st.image(recognizer.templates[char], caption=f"Reference {char}")
+                    st.image(recognizer.templates[char], caption=f"Reference {char}", width=100)
                 else:
                     st.warning(f"No match found (Best match confidence: {confidence:.2f})")
 
