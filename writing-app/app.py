@@ -22,31 +22,99 @@ class SitelenPonaTeacher:
         return templates
 
     def preprocess_image(self, image):
-        """Preprocess image for comparison"""
+        """Preprocess image for feature detection"""
         if len(image.shape) == 3:
             image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
-        # Resize to standard size
+        # Normalize size
         image = cv2.resize(image, (100, 100))
 
-        # Threshold to create binary image
-        _, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
-
+        # Convert to binary, ensuring black strokes on white background
+        _, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY_INV)
+        
+        # Find the bounding box of the content
+        coords = cv2.findNonZero(binary)
+        if coords is not None:
+            x, y, w, h = cv2.boundingRect(coords)
+            
+            # Add padding
+            padding = 2
+            x = max(0, x - padding)
+            y = max(0, y - padding)
+            w = min(binary.shape[1] - x, w + 2*padding)
+            h = min(binary.shape[0] - y, h + 2*padding)
+            
+            # Crop to content
+            binary = binary[y:y+h, x:x+w]
+            
+            # Resize the cropped content to standard size while maintaining aspect ratio
+            if w > h:
+                new_w = 80
+                new_h = int(h * (80/w))
+            else:
+                new_h = 80
+                new_w = int(w * (80/h))
+            
+            binary = cv2.resize(binary, (new_w, new_h))
+            
+            # Create a new centered image
+            result = np.zeros((100, 100), dtype=np.uint8)
+            y_offset = (100 - new_h) // 2
+            x_offset = (100 - new_w) // 2
+            result[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = binary
+            
+            return result
+        
         return binary
+
+    def draw_debug_visualization(self, image, contour, centroid=None):
+        """Draw contour and centroid on image for visualization"""
+        # Convert grayscale to RGB for colored visualization
+        vis_image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        
+        # Draw contour in red
+        cv2.drawContours(vis_image, [contour], -1, (255, 0, 0), 2)
+        
+        # Draw centroid in green if provided
+        if centroid is not None:
+            cx, cy = centroid
+            cv2.circle(vis_image, (int(cx), int(cy)), 5, (0, 255, 0), -1)
+            
+        return vis_image
 
     def analyze_drawing(self, drawn_image, target_char):
         """Analyze drawing compared to target character"""
         if target_char not in self.templates:
             return None
 
+        # Debug: Show input images
+        with st.expander("Debug: Input Images", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("Drawn Image:")
+                st.image(drawn_image, caption="Raw Input", width=200)
+            with col2:
+                st.write("Target Template:")
+                st.image(self.templates[target_char], caption="Template", width=200)
+
         # Preprocess drawn image
         processed_drawing = self.preprocess_image(drawn_image)
         target_template = self.templates[target_char]
 
+        # Debug: Show preprocessed images
+        with st.expander("Debug: Preprocessed Images", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("Processed Drawing:")
+                st.image(processed_drawing, caption="Processed Input", width=200)
+            with col2:
+                st.write("Target Template:")
+                st.image(target_template, caption="Template", width=200)
+
         # Calculate various similarity metrics
         feedback = {}
 
-        # 1. Overall shape similarity using contours
+        # Find contours
         contours_drawing, _ = cv2.findContours(
             processed_drawing, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
@@ -54,25 +122,71 @@ class SitelenPonaTeacher:
             target_template, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
 
+        # Debug: Show contour information
+        with st.expander("Debug: Contour Analysis", expanded=True):
+            st.write(f"Number of contours in drawing: {len(contours_drawing)}")
+            st.write(f"Number of contours in template: {len(contours_target)}")
+
         if contours_drawing and contours_target:
             # Compare main contours
             main_contour_drawing = max(contours_drawing, key=cv2.contourArea)
             main_contour_target = max(contours_target, key=cv2.contourArea)
 
-            # Shape similarity
+            # Calculate centroids
+            moments_drawing = cv2.moments(main_contour_drawing)
+            moments_target = cv2.moments(main_contour_target)
+            
+            drawing_centroid = None
+            target_centroid = None
+            
+            if moments_drawing["m00"] != 0:
+                cx_drawing = moments_drawing["m10"] / moments_drawing["m00"]
+                cy_drawing = moments_drawing["m01"] / moments_drawing["m00"]
+                drawing_centroid = (cx_drawing, cy_drawing)
+                
+            if moments_target["m00"] != 0:
+                cx_target = moments_target["m10"] / moments_target["m00"]
+                cy_target = moments_target["m01"] / moments_target["m00"]
+                target_centroid = (cx_target, cy_target)
+
+            # Debug: Show contour visualization
+            with st.expander("Debug: Contour Visualization", expanded=True):
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.write("Drawing Contours and Centroid:")
+                    vis_drawing = self.draw_debug_visualization(processed_drawing, main_contour_drawing, drawing_centroid)
+                    st.image(vis_drawing, caption="Drawing Analysis", width=200)
+                with col2:
+                    st.write("Template Contours and Centroid:")
+                    vis_template = self.draw_debug_visualization(target_template, main_contour_target, target_centroid)
+                    st.image(vis_template, caption="Template Analysis", width=200)
+
+            # Debug: Show contour areas
+            with st.expander("Debug: Contour Measurements", expanded=True):
+                st.write(f"Drawing contour area: {cv2.contourArea(main_contour_drawing):.2f}")
+                st.write(f"Template contour area: {cv2.contourArea(main_contour_target):.2f}")
+
+            # Shape similarity using contours and Hu moments
             similarity = cv2.matchShapes(
                 main_contour_drawing, main_contour_target, cv2.CONTOURS_MATCH_I2, 0
             )
-            shape_score = 1 / (1 + similarity)  # Convert to similarity score
-            feedback["shape_similarity"] = shape_score
+            # Debug: Show raw similarity score
+            with st.expander("Debug: Shape Analysis", expanded=True):
+                st.write(f"Raw matchShapes similarity score: {similarity:.6f}")
+            
+            # More aggressive exponential decay for shape similarity
+            shape_score = np.exp(-50 * similarity)  # Much steeper decay
+            feedback["shape_similarity"] = min(shape_score, 1.0)  # Cap at 100%
 
-            # Size comparison
+            # Size comparison with stricter scoring
             area_drawing = cv2.contourArea(main_contour_drawing)
             area_target = cv2.contourArea(main_contour_target)
-            size_ratio = min(area_drawing, area_target) / max(area_drawing, area_target)
+            area_ratio = min(area_drawing, area_target) / max(area_drawing, area_target)
+            # Apply a power function to make the size score more sensitive
+            size_ratio = area_ratio ** 2  # Square the ratio to make it more strict
             feedback["size_accuracy"] = size_ratio
 
-            # Position analysis
+            # Position analysis with normalized distance
             moments_drawing = cv2.moments(main_contour_drawing)
             moments_target = cv2.moments(main_contour_target)
 
@@ -82,10 +196,17 @@ class SitelenPonaTeacher:
                 cx_target = moments_target["m10"] / moments_target["m00"]
                 cy_target = moments_target["m01"] / moments_target["m00"]
 
+                # Debug: Show centroid positions
+                with st.expander("Debug: Position Analysis", expanded=True):
+                    st.write(f"Drawing centroid: ({cx_drawing:.2f}, {cy_drawing:.2f})")
+                    st.write(f"Template centroid: ({cx_target:.2f}, {cy_target:.2f})")
+
+                # Calculate normalized distance (as a fraction of image size)
+                img_diagonal = np.sqrt(100 * 100 + 100 * 100)  # Image is 100x100
                 position_error = np.sqrt(
                     (cx_drawing - cx_target) ** 2 + (cy_drawing - cy_target) ** 2
                 )
-                position_score = 1 - min(position_error / 50, 1)  # Normalize to 0-1
+                position_score = max(0, 1 - (position_error / (img_diagonal * 0.2)))  # More sensitive to position
                 feedback["position_accuracy"] = position_score
 
         return feedback
