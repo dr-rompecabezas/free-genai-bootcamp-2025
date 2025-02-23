@@ -54,20 +54,28 @@ class SitelenPonaRecognizer:
 
     def compare_images(self, img1, img2):
         """Compare two preprocessed images and return similarity score"""
-        # Using multiple comparison methods for robustness
+        scores = []
         
-        # Method 1: Template matching
+        # Method 1: Template matching with CCOEFF_NORMED
         result = cv2.matchTemplate(img1, img2, cv2.TM_CCOEFF_NORMED)
-        score1 = np.max(result)
+        scores.append(np.max(result) * 0.4)  # 40% weight
         
-        # Method 2: Structural Similarity Index
-        score2 = cv2.matchTemplate(img1, img2, cv2.TM_SQDIFF_NORMED)
-        score2 = 1 - np.min(score2)  # Convert to similarity score
+        # Method 2: SQDIFF_NORMED (converted to similarity)
+        result = cv2.matchTemplate(img1, img2, cv2.TM_SQDIFF_NORMED)
+        scores.append((1 - np.min(result)) * 0.3)  # 30% weight
         
-        # Combine scores
-        return (score1 + score2) / 2
+        # Method 3: Check with slight rotations
+        max_rotation_score = 0
+        for angle in [-10, -5, 0, 5, 10]:
+            matrix = cv2.getRotationMatrix2D((img1.shape[1]/2, img1.shape[0]/2), angle, 1)
+            rotated = cv2.warpAffine(img1, matrix, (img1.shape[1], img1.shape[0]))
+            result = cv2.matchTemplate(rotated, img2, cv2.TM_CCOEFF_NORMED)
+            max_rotation_score = max(max_rotation_score, np.max(result))
+        scores.append(max_rotation_score * 0.3)  # 30% weight
+        
+        return sum(scores)
 
-    def recognize(self, drawn_image, threshold=0.7):
+    def recognize(self, drawn_image, threshold=0.5):
         """Recognize drawn character by comparing with templates"""
         processed_input = self.preprocess_image(drawn_image)
         
@@ -122,7 +130,7 @@ def main():
         uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Image", use_column_width=True)
+            st.image(image, caption="Uploaded Image", use_container_width=True)
             
             if st.button("Check Character"):
                 image_array = np.array(image)
@@ -138,7 +146,7 @@ def main():
         picture = st.camera_input("Take a picture")
         if picture:
             image = Image.open(picture)
-            st.image(image, caption="Captured Image", use_column_width=True)
+            st.image(image, caption="Captured Image", use_container_width=True)
             
             if st.button("Check Character"):
                 image_array = np.array(image)
