@@ -1,0 +1,15 @@
+[project]
+name = "sitelen-pona-ai"
+version = "0.1.0"
+description = "Sitelen Pona AI Learning Prototype"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.2.3",
+    "opencv-python>=4.11.0.86",
+    "pillow>=11.1.0",
+    "ruff>=0.9.7",
+    "streamlit>=1.42.2",
+    "streamlit-drawable-canvas>=0.9.3",
+    "watchdog>=6.0.0",
+]
