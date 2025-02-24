@@ -44,7 +44,7 @@ def draw_matches(img1, kp1, img2, kp2, matches, good_match_ratio=0.75):
 
 
 class ORBSitelenPonaRecognizer:
-    def __init__(self, templates_dir="templates", feature_count=100):
+    def __init__(self, templates_dir="../templates", feature_count=100):
         """Initialize with a directory of template images"""
         self.templates_dir = templates_dir  # Store directory path
         self.raw_templates = {}  # Store raw template images

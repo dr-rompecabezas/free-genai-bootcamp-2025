@@ -8,7 +8,7 @@ from streamlit_drawable_canvas import st_canvas
 
 
 class SitelenPonaRecognizer:
-    def __init__(self, templates_dir="templates"):
+    def __init__(self, templates_dir="../templates"):
         """Initialize with a directory of template images"""
         self.templates = {}
         self.load_templates(templates_dir)

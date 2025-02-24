@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 class SitelenPonaRecognizer:
-    def __init__(self, model_path="models/efficientnet_lite0_fp32.tflite"):
+    def __init__(self, model_path="../models/efficientnet_lite0_fp32.tflite"):
         """Initialize the recognizer with MediaPipe"""
         # Create options for the MediaPipe Image Embedder
         base_options = python.BaseOptions(model_asset_path=model_path)
@@ -27,7 +27,7 @@ class SitelenPonaRecognizer:
         self.all_scores = {}
         self.load_templates()
 
-    def load_templates(self, templates_dir="templates"):
+    def load_templates(self, templates_dir="../templates"):
         """Load and compute embeddings for all template images"""
         template_path = Path(templates_dir)
         for template_file in template_path.glob("*.png"):

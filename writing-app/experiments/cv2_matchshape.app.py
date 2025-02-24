@@ -6,7 +6,7 @@ from streamlit_drawable_canvas import st_canvas
 
 
 class SitelenPonaTeacher:
-    def __init__(self, templates_dir="templates"):
+    def __init__(self, templates_dir="../templates"):
         self.templates_dir = templates_dir
         self.templates = self.load_templates()
 

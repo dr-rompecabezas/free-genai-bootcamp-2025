@@ -13,7 +13,7 @@ A Streamlit-based web application for recognizing hand-drawn Sitelen Pona charac
 - [Project Structure](#project-structure)
 - [Notes](#notes)
 - [License](#license)
-- [Successful Approach Using MediaPipe with MobileNet](#successful-approach-using-mediapipe-with-mobilenet)
+- [Successful Approach Using MediaPipe with MobileNetV3-Small](#successful-approach-using-mediapipe-with-mobilenetv3-small)
   - [Key Components](#key-components)
   - [Advantages](#advantages)
   - [Implementation Details](#implementation-details)
@@ -41,6 +41,8 @@ A Streamlit-based web application for recognizing hand-drawn Sitelen Pona charac
 - Template-based matching system
 - Pre-processed template library included
 - Simple and intuitive user interface
+- Debug mode for visualizing intermediate steps and embeddings
+- Responsive design with light and dark modes
 
 ## Technical Approach
 
@@ -87,9 +89,17 @@ The app uses an image preprocessing pipeline that:
    pip install -r requirements.txt
    ```
 
-3. Run the Streamlit app:
+3. Download the pre-converted TFLite model:
 
    ```bash
+   cd scripts
+   python download_mobilenet.py
+   ```
+
+4. Run the Streamlit app:
+
+   ```bash
+   cd ..  # Back to the root directory
    streamlit run app.py
    ```
 
@@ -97,11 +107,19 @@ The app will open in your default web browser. You can start drawing characters 
 
 ## Project Structure
 
-- `app.py` - Main application code with Streamlit interface and recognition logic
-- `templates/` - Directory containing preprocessed template images
-- `sitelen_pona_svgs/` - Original SVG files for reference
-- `scripts/` - Utility scripts used for initial setup (**Note:** These scripts are included for reference only and are not meant to be run)
-- `models/` - Pre-converted TFLite model (obtained via the respective scripts)
+writing-app/
+├── app.py              # Main application using MobileNet approach
+├── experiments/        # Previous experimental approaches
+│   ├── cv2_matchshape.app.py    # Shape matching attempt
+│   ├── cv2_matchtemplate.app.py # Template matching attempt
+│   ├── cv2_orb.app.py          # Feature matching attempt
+│   └── mediapipe.app.py        # MediaPipe with EfficientNet attempt
+├── models/            # Model directory
+├── scripts/          # Utility scripts
+├── sitelen_pona_svgs/ # Original SVG files
+├── sitelen_pona_svgs_dark/ # White SVG files for dark mode
+├── templates/        # Template images
+└── requirements.txt  # Python dependencies
 
 ## Notes
 
@@ -111,7 +129,7 @@ The `scripts/` directory contains the original web scraping and image processing
 
 The template images are derived from content available under CC BY-SA 3.0 license from the Sona Pona Wiki.
 
-## Successful Approach Using MediaPipe with MobileNet
+## Successful Approach Using MediaPipe with MobileNetV3-Small
 
 After exploring several approaches, we found success using MediaPipe's Image Embedder task with a MobileNetV3-Small backbone. This approach offers several advantages:
 
@@ -184,7 +202,16 @@ For more information about the MediaPipe Image Embedder:
 
 Several approaches were explored to recognize and evaluate hand-drawn Sitelen Pona characters. The main challenge was finding a computer vision technique that could effectively compare simple geometric shapes while being tolerant of natural variations in human drawing. Each attempt revealed different aspects of the problem and helped inform potential future solutions.
 
-   The fundamental issue is that we're trying to do character recognition, but we're treating it as either image matching (OpenCV) or general image classification (EfficientNet). What we really need is a model specifically trained for handwritten character recognition.
+The fundamental issue is that we were trying to do character recognition, but we were treating it as either image matching (OpenCV) or general image classification (EfficientNet). What we really needed is a model specifically trained for handwritten character recognition. In the apparent absence of such a model, we went with MobileNetV3-Small as described above.
+
+To run any of the experimental approaches, execute:
+
+```bash
+cd experiments
+streamlit run <experiment_file>.app.py
+```
+
+See more details below about the experiments.
 
 ### 1. Template Matching (`cv2_matchtemplate.app.py`)
 
@@ -197,6 +224,7 @@ First attempt using OpenCV's `cv2.matchTemplate()`. This approach:
 To run this attempt, execute:
 
 ```bash
+cd experiments
 python cv2_matchtemplate.app.py
 ```
 
@@ -220,6 +248,7 @@ Third attempt using `cv2.matchShapes()`:
 To run this attempt, execute:
 
 ```bash
+cd experiments
 python cv2_matchshape.app.py
 ```
 
@@ -236,7 +265,8 @@ To use this version:
 1. Download the pre-converted TFLite model:
 
    ```bash
-   python download_model.py
+   cd scripts
+   python download_efficientnet.py
    ```
 
    This will download the EfficientNet Lite model (approximately 18MB) required for character recognition. The model will be saved in the models directory.
@@ -244,6 +274,7 @@ To use this version:
 2. Run the app as normal with:
 
    ```bash
+   cd ../experiments  # Back to the experiments directory
    streamlit run mediapipe.app.py
    ```
 
