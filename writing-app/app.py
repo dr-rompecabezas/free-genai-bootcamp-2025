@@ -31,6 +31,8 @@ class SessionKey:
     REFERENCE_BUTTON_KEY = "reference_button_key"
     SELECTED_CHAR = "selected_char"
     WHITE_GLYPHS = "white_glyphs"
+    STROKE_THICKNESS = "stroke_thickness"
+    SHOW_REFERENCE_DEFAULT = "show_reference_default"
 
 
 # UI element keys
@@ -254,8 +256,10 @@ def main():
         st.session_state[SessionKey.DEBUG_MODE] = False
     if SessionKey.THRESHOLD not in st.session_state:
         st.session_state[SessionKey.THRESHOLD] = 0.7
+    if SessionKey.SHOW_REFERENCE_DEFAULT not in st.session_state:
+        st.session_state[SessionKey.SHOW_REFERENCE_DEFAULT] = True
     if SessionKey.SHOW_REFERENCE not in st.session_state:
-        st.session_state[SessionKey.SHOW_REFERENCE] = True
+        st.session_state[SessionKey.SHOW_REFERENCE] = st.session_state[SessionKey.SHOW_REFERENCE_DEFAULT]
     if SessionKey.REFERENCE_BUTTON_KEY not in st.session_state:
         st.session_state[SessionKey.REFERENCE_BUTTON_KEY] = 0
     if SessionKey.SELECTED_CHAR not in st.session_state:
@@ -265,6 +269,10 @@ def main():
             f[:-4] for f in available_chars if f.endswith(".svg")
         ]  # remove .svg
         st.session_state[SessionKey.SELECTED_CHAR] = random.choice(available_chars)
+    if SessionKey.WHITE_GLYPHS not in st.session_state:
+        st.session_state[SessionKey.WHITE_GLYPHS] = False
+    if SessionKey.STROKE_THICKNESS not in st.session_state:
+        st.session_state[SessionKey.STROKE_THICKNESS] = 8
 
     def toggle_reference():
         st.session_state[SessionKey.SHOW_REFERENCE] = not st.session_state[
@@ -272,12 +280,12 @@ def main():
         ]
         st.session_state[SessionKey.REFERENCE_BUTTON_KEY] += 1
 
+    def on_char_selection():
+        # Reset reference visibility to default when character changes
+        st.session_state[SessionKey.SHOW_REFERENCE] = st.session_state[SessionKey.SHOW_REFERENCE_DEFAULT]
+
     # Main app
     recognizer = MobileNetSitelenPonaRecognizer()
-
-    # Initialize glyph color preference in session state if not present
-    if SessionKey.WHITE_GLYPHS not in st.session_state:
-        st.session_state[SessionKey.WHITE_GLYPHS] = False
 
     # Get all SVG files (strip _dark suffix for naming)
     svg_files = []
@@ -334,6 +342,7 @@ def main():
                 index=available_chars.index(st.session_state[SessionKey.SELECTED_CHAR]),
                 help="Choose a Sitelen Pona character to practice writing",
                 key=UIKey.CHAR_SELECTOR,
+                on_change=on_char_selection,
             )
 
         with col2:
@@ -359,27 +368,38 @@ def main():
 
             st.divider()
 
-            # Settings section
-            st.subheader("Settings")
-
             # Practice settings
-            st.write("**Practice Settings**")
-            st.session_state[SessionKey.SHOW_REFERENCE] = st.toggle(
+            st.subheader("Practice Settings")
+            
+            # Reference toggle default
+            st.session_state[SessionKey.SHOW_REFERENCE_DEFAULT] = st.toggle(
                 "Show Reference by Default",
-                value=st.session_state[SessionKey.SHOW_REFERENCE],
-                help="When disabled, reference will be hidden until you click 'Show Reference'",
+                value=st.session_state[SessionKey.SHOW_REFERENCE_DEFAULT],
+                help="When enabled, reference will be shown when selecting a new character",
             )
 
-            # Recognition settings
-            st.write("**Recognition Settings**")
+            # Recognition threshold
             st.session_state[SessionKey.THRESHOLD] = st.slider(
                 "Recognition Threshold",
-                min_value=0.0,
-                max_value=1.0,
+                min_value=0.5,
+                max_value=0.9,
                 value=st.session_state[SessionKey.THRESHOLD],
                 step=0.05,
                 help="Lower values are more lenient, higher values require more precise matches",
             )
+
+            # Drawing settings (only show in draw mode)
+            if mode == InputMode.DRAW:
+                st.slider(
+                    "Stroke Thickness",
+                    min_value=1,
+                    max_value=10,
+                    value=st.session_state[SessionKey.STROKE_THICKNESS],
+                    key=SessionKey.STROKE_THICKNESS,
+                    help="Adjust the thickness of your drawing strokes",
+                )
+
+            st.divider()
 
             # Debug settings
             st.write("**Developer Options**")
@@ -407,11 +427,12 @@ def main():
                 st.subheader("Practice Area:")
                 # Canvas for drawing
                 canvas_result = st_canvas(
-                    stroke_width=4,
-                    stroke_color="#000000",
-                    background_color="#FFFFFF",
-                    height=224,
+                    fill_color="rgba(255, 255, 255, 0.0)",
+                    stroke_width=st.session_state[SessionKey.STROKE_THICKNESS],
+                    stroke_color="#000000" if not st.session_state[SessionKey.WHITE_GLYPHS] else "#FFFFFF",
+                    background_color="#FFFFFF" if not st.session_state[SessionKey.WHITE_GLYPHS] else "#000000",
                     width=224,
+                    height=224,
                     drawing_mode="freedraw",
                     key=UIKey.CANVAS,
                 )
