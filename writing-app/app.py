@@ -12,6 +12,17 @@ import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 
 
+# Input mode constants
+class InputMode:
+    DRAW = "Draw Character"
+    UPLOAD = "Upload Image"
+    WEBCAM = "Webcam"
+
+    @classmethod
+    def all_modes(cls):
+        return [cls.DRAW, cls.UPLOAD, cls.WEBCAM]
+
+
 class MobileNetSitelenPonaRecognizer:
     def __init__(
         self, templates_dir="templates", model_path="models/mobilenet_v3_small.tflite"
@@ -283,7 +294,7 @@ def main():
         with st.sidebar:
             # Input method selection
             mode = st.selectbox(
-                "Choose Input Method", ["Draw Character", "Upload Image", "Webcam"]
+                "Choose Input Method", InputMode.all_modes()
             )
 
             st.divider()
@@ -332,7 +343,7 @@ def main():
         col1, col2 = st.columns([2, 1])
 
         with col1:
-            if mode == "Draw Character":
+            if mode == InputMode.DRAW:
                 st.subheader("Practice Area:")
                 # Canvas for drawing
                 canvas_result = st_canvas(
@@ -344,7 +355,7 @@ def main():
                     drawing_mode="freedraw",
                     key="canvas",
                 )
-            elif mode == "Upload Image":
+            elif mode == InputMode.UPLOAD:
                 st.subheader("Upload Area:")
                 # File uploader
                 uploaded_file = st.file_uploader(
@@ -538,7 +549,7 @@ def main():
             )
 
         # Results and Debug Container
-        if mode == "Draw Character":
+        if mode == InputMode.DRAW:
             if canvas_result.image_data is not None and st.button("Check My Drawing"):
                 try:
                     # Get embedding and debug image
