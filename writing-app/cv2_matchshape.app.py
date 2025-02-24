@@ -31,55 +31,55 @@ class SitelenPonaTeacher:
 
         # Convert to binary, ensuring black strokes on white background
         _, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY_INV)
-        
+
         # Find the bounding box of the content
         coords = cv2.findNonZero(binary)
         if coords is not None:
             x, y, w, h = cv2.boundingRect(coords)
-            
+
             # Add padding
             padding = 2
             x = max(0, x - padding)
             y = max(0, y - padding)
-            w = min(binary.shape[1] - x, w + 2*padding)
-            h = min(binary.shape[0] - y, h + 2*padding)
-            
+            w = min(binary.shape[1] - x, w + 2 * padding)
+            h = min(binary.shape[0] - y, h + 2 * padding)
+
             # Crop to content
-            binary = binary[y:y+h, x:x+w]
-            
+            binary = binary[y : y + h, x : x + w]
+
             # Resize the cropped content to standard size while maintaining aspect ratio
             if w > h:
                 new_w = 80
-                new_h = int(h * (80/w))
+                new_h = int(h * (80 / w))
             else:
                 new_h = 80
-                new_w = int(w * (80/h))
-            
+                new_w = int(w * (80 / h))
+
             binary = cv2.resize(binary, (new_w, new_h))
-            
+
             # Create a new centered image
             result = np.zeros((100, 100), dtype=np.uint8)
             y_offset = (100 - new_h) // 2
             x_offset = (100 - new_w) // 2
-            result[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = binary
-            
+            result[y_offset : y_offset + new_h, x_offset : x_offset + new_w] = binary
+
             return result
-        
+
         return binary
 
     def draw_debug_visualization(self, image, contour, centroid=None):
         """Draw contour and centroid on image for visualization"""
         # Convert grayscale to RGB for colored visualization
         vis_image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-        
+
         # Draw contour in red
         cv2.drawContours(vis_image, [contour], -1, (255, 0, 0), 2)
-        
+
         # Draw centroid in green if provided
         if centroid is not None:
             cx, cy = centroid
             cv2.circle(vis_image, (int(cx), int(cy)), 5, (0, 255, 0), -1)
-            
+
         return vis_image
 
     def analyze_drawing(self, drawn_image, target_char):
@@ -135,15 +135,15 @@ class SitelenPonaTeacher:
             # Calculate centroids
             moments_drawing = cv2.moments(main_contour_drawing)
             moments_target = cv2.moments(main_contour_target)
-            
+
             drawing_centroid = None
             target_centroid = None
-            
+
             if moments_drawing["m00"] != 0:
                 cx_drawing = moments_drawing["m10"] / moments_drawing["m00"]
                 cy_drawing = moments_drawing["m01"] / moments_drawing["m00"]
                 drawing_centroid = (cx_drawing, cy_drawing)
-                
+
             if moments_target["m00"] != 0:
                 cx_target = moments_target["m10"] / moments_target["m00"]
                 cy_target = moments_target["m01"] / moments_target["m00"]
@@ -154,17 +154,25 @@ class SitelenPonaTeacher:
                 col1, col2 = st.columns(2)
                 with col1:
                     st.write("Drawing Contours and Centroid:")
-                    vis_drawing = self.draw_debug_visualization(processed_drawing, main_contour_drawing, drawing_centroid)
+                    vis_drawing = self.draw_debug_visualization(
+                        processed_drawing, main_contour_drawing, drawing_centroid
+                    )
                     st.image(vis_drawing, caption="Drawing Analysis", width=200)
                 with col2:
                     st.write("Template Contours and Centroid:")
-                    vis_template = self.draw_debug_visualization(target_template, main_contour_target, target_centroid)
+                    vis_template = self.draw_debug_visualization(
+                        target_template, main_contour_target, target_centroid
+                    )
                     st.image(vis_template, caption="Template Analysis", width=200)
 
             # Debug: Show contour areas
             with st.expander("Debug: Contour Measurements", expanded=True):
-                st.write(f"Drawing contour area: {cv2.contourArea(main_contour_drawing):.2f}")
-                st.write(f"Template contour area: {cv2.contourArea(main_contour_target):.2f}")
+                st.write(
+                    f"Drawing contour area: {cv2.contourArea(main_contour_drawing):.2f}"
+                )
+                st.write(
+                    f"Template contour area: {cv2.contourArea(main_contour_target):.2f}"
+                )
 
             # Shape similarity using contours and Hu moments
             similarity = cv2.matchShapes(
@@ -173,12 +181,12 @@ class SitelenPonaTeacher:
             # Debug: Show raw similarity score
             with st.expander("Debug: Shape Analysis", expanded=True):
                 st.write(f"Raw matchShapes similarity score: {similarity:.6f}")
-            
+
             # Based on empirical testing with Sitelen Pona glyphs:
             # similarity < 1.0 = very good match (>80%)
             # similarity 1.0-3.0 = decent match (40-80%)
             # similarity > 3.0 = poor match (<40%)
-            
+
             # Use a piece-wise function for more intuitive scoring
             if similarity < 1.0:
                 # Very good matches: map [0, 1] to [80%, 100%]
@@ -189,13 +197,15 @@ class SitelenPonaTeacher:
             else:
                 # Poor matches: exponential decay for scores below 40%
                 shape_score = 0.4 * np.exp(-0.3 * (similarity - 3))
-            
+
             # Add more debug info about score conversion
             with st.expander("Debug: Score Conversion", expanded=True):
                 st.write(f"Raw similarity: {similarity:.6f}")
-                st.write(f"Score category: {'Very good' if similarity < 1.0 else 'Decent' if similarity < 3.0 else 'Poor'}")
+                st.write(
+                    f"Score category: {'Very good' if similarity < 1.0 else 'Decent' if similarity < 3.0 else 'Poor'}"
+                )
                 st.write(f"Final score: {shape_score:.2%}")
-                
+
             feedback["shape_similarity"] = shape_score
 
             # Size comparison with stricter scoring
@@ -203,7 +213,9 @@ class SitelenPonaTeacher:
             area_target = cv2.contourArea(main_contour_target)
             area_ratio = min(area_drawing, area_target) / max(area_drawing, area_target)
             # Make size scoring more lenient
-            size_ratio = np.sqrt(area_ratio)  # Use square root instead of square to be more lenient
+            size_ratio = np.sqrt(
+                area_ratio
+            )  # Use square root instead of square to be more lenient
             feedback["size_accuracy"] = size_ratio
 
             # Position analysis with normalized distance
@@ -222,7 +234,9 @@ class SitelenPonaTeacher:
                     (cx_drawing - cx_target) ** 2 + (cy_drawing - cy_target) ** 2
                 )
                 # Make position scoring more lenient
-                position_score = max(0, 1 - (position_error / (img_diagonal * 0.3)))  # Increased from 0.2 to 0.3
+                position_score = max(
+                    0, 1 - (position_error / (img_diagonal * 0.3))
+                )  # Increased from 0.2 to 0.3
                 feedback["position_accuracy"] = position_score
 
         return feedback

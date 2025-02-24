@@ -2,7 +2,7 @@ import os
 import urllib.request
 
 # Create models directory if it doesn't exist
-os.makedirs('models', exist_ok=True)
+os.makedirs("models", exist_ok=True)
 
 # URL for the pre-converted TFLite model
 model_url = "https://storage.googleapis.com/mediapipe-models/image_classifier/efficientnet_lite0/float32/1/efficientnet_lite0.tflite"
