@@ -11,3 +11,6 @@ wheels/
 
 # Settings
 .env
+
+# Downloaded models
+models/
