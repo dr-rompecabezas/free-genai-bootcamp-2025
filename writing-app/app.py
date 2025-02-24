@@ -23,6 +23,16 @@ class InputMode:
         return [cls.DRAW, cls.UPLOAD, cls.WEBCAM]
 
 
+# Session state keys
+class SessionKey:
+    DEBUG_MODE = "debug_mode"
+    THRESHOLD = "threshold"
+    SHOW_REFERENCE = "show_reference"
+    REFERENCE_BUTTON_KEY = "reference_button_key"
+    SELECTED_CHAR = "selected_char"
+    WHITE_GLYPHS = "white_glyphs"
+
+
 class MobileNetSitelenPonaRecognizer:
     def __init__(
         self, templates_dir="templates", model_path="models/mobilenet_v3_small.tflite"
@@ -196,32 +206,32 @@ def main():
     st.title("Sitelen Pona Writing Practice")
 
     # Initialize session state for settings if not exists
-    if "debug_mode" not in st.session_state:
-        st.session_state.debug_mode = False
-    if "threshold" not in st.session_state:
-        st.session_state.threshold = 0.7
-    if "show_reference" not in st.session_state:
-        st.session_state.show_reference = True
-    if "reference_button_key" not in st.session_state:
-        st.session_state.reference_button_key = 0
-    if "selected_char" not in st.session_state:
+    if SessionKey.DEBUG_MODE not in st.session_state:
+        st.session_state[SessionKey.DEBUG_MODE] = False
+    if SessionKey.THRESHOLD not in st.session_state:
+        st.session_state[SessionKey.THRESHOLD] = 0.7
+    if SessionKey.SHOW_REFERENCE not in st.session_state:
+        st.session_state[SessionKey.SHOW_REFERENCE] = True
+    if SessionKey.REFERENCE_BUTTON_KEY not in st.session_state:
+        st.session_state[SessionKey.REFERENCE_BUTTON_KEY] = 0
+    if SessionKey.SELECTED_CHAR not in st.session_state:
         # Initialize with a random character
         available_chars = sorted(os.listdir("sitelen_pona_svgs"))
         available_chars = [
             f[:-4] for f in available_chars if f.endswith(".svg")
         ]  # remove .svg
-        st.session_state.selected_char = random.choice(available_chars)
+        st.session_state[SessionKey.SELECTED_CHAR] = random.choice(available_chars)
 
     def toggle_reference():
-        st.session_state.show_reference = not st.session_state.show_reference
-        st.session_state.reference_button_key += 1
+        st.session_state[SessionKey.SHOW_REFERENCE] = not st.session_state[SessionKey.SHOW_REFERENCE]
+        st.session_state[SessionKey.REFERENCE_BUTTON_KEY] += 1
 
     # Main app
     recognizer = MobileNetSitelenPonaRecognizer()
 
     # Initialize glyph color preference in session state if not present
-    if "white_glyphs" not in st.session_state:
-        st.session_state.white_glyphs = False
+    if SessionKey.WHITE_GLYPHS not in st.session_state:
+        st.session_state[SessionKey.WHITE_GLYPHS] = False
 
     # Get all SVG files (strip _dark suffix for naming)
     svg_files = []
@@ -240,8 +250,8 @@ def main():
         # Add glyph color toggle
         use_white_glyphs = st.toggle(
             "Use white glyphs",
-            value=st.session_state.white_glyphs,
-            key="white_glyphs",
+            value=st.session_state[SessionKey.WHITE_GLYPHS],
+            key=SessionKey.WHITE_GLYPHS,
             help="Switch between black and white glyphs",
         )
         st.write("")  # Add some spacing
@@ -275,7 +285,7 @@ def main():
             selected_char = st.selectbox(
                 "Select Character to Practice",
                 available_chars,
-                index=available_chars.index(st.session_state.selected_char),
+                index=available_chars.index(st.session_state[SessionKey.SELECTED_CHAR]),
                 help="Choose a Sitelen Pona character to practice writing",
                 key="char_selector",
             )
@@ -284,11 +294,11 @@ def main():
             # Create empty space to push button to bottom
             st.write("")
             if st.button("🎲 Random", help="Select a random character to practice"):
-                st.session_state.selected_char = random.choice(available_chars)
+                st.session_state[SessionKey.SELECTED_CHAR] = random.choice(available_chars)
                 # Rerun to update the selectbox with the new random selection
                 st.rerun()
         
-        st.session_state.selected_char = selected_char
+        st.session_state[SessionKey.SELECTED_CHAR] = selected_char
 
         # Sidebar settings
         with st.sidebar:
@@ -304,28 +314,28 @@ def main():
 
             # Practice settings
             st.write("**Practice Settings**")
-            st.session_state.show_reference = st.toggle(
+            st.session_state[SessionKey.SHOW_REFERENCE] = st.toggle(
                 "Show Reference by Default",
-                value=st.session_state.show_reference,
+                value=st.session_state[SessionKey.SHOW_REFERENCE],
                 help="When disabled, reference will be hidden until you click 'Show Reference'",
             )
 
             # Recognition settings
             st.write("**Recognition Settings**")
-            st.session_state.threshold = st.slider(
+            st.session_state[SessionKey.THRESHOLD] = st.slider(
                 "Recognition Threshold",
                 min_value=0.0,
                 max_value=1.0,
-                value=st.session_state.threshold,
+                value=st.session_state[SessionKey.THRESHOLD],
                 step=0.05,
                 help="Lower values are more lenient, higher values require more precise matches",
             )
 
             # Debug settings
             st.write("**Developer Options**")
-            st.session_state.debug_mode = st.toggle(
+            st.session_state[SessionKey.DEBUG_MODE] = st.toggle(
                 "Debug Mode",
-                value=st.session_state.debug_mode,
+                value=st.session_state[SessionKey.DEBUG_MODE],
                 help="Show detailed information about image processing and recognition",
             )
 
@@ -386,15 +396,15 @@ def main():
 
                             # Show recognition result first
                             st.subheader("Recognition Result")
-                            if confidence >= st.session_state.threshold:
+                            if confidence >= st.session_state[SessionKey.THRESHOLD]:
                                 st.success(f"Great job! Similarity score: {confidence:.4f}")
-                            elif confidence >= st.session_state.threshold * 0.7:
+                            elif confidence >= st.session_state[SessionKey.THRESHOLD] * 0.7:
                                 st.warning(f"Getting there! Similarity score: {confidence:.4f}")
                             else:
                                 st.error(f"Keep practicing! Similarity score: {confidence:.4f}")
 
                             # Only show debug information if debug mode is enabled
-                            if st.session_state.debug_mode:
+                            if st.session_state[SessionKey.DEBUG_MODE]:
                                 with st.expander("Debug Information", expanded=True):
                                     # Show embedding shapes and raw values
                                     st.write("Embedding Analysis:")
@@ -468,15 +478,15 @@ def main():
 
                             # Show recognition result first
                             st.subheader("Recognition Result")
-                            if confidence >= st.session_state.threshold:
+                            if confidence >= st.session_state[SessionKey.THRESHOLD]:
                                 st.success(f"Great job! Similarity score: {confidence:.4f}")
-                            elif confidence >= st.session_state.threshold * 0.7:
+                            elif confidence >= st.session_state[SessionKey.THRESHOLD] * 0.7:
                                 st.warning(f"Getting there! Similarity score: {confidence:.4f}")
                             else:
                                 st.error(f"Keep practicing! Similarity score: {confidence:.4f}")
 
                             # Only show debug information if debug mode is enabled
-                            if st.session_state.debug_mode:
+                            if st.session_state[SessionKey.DEBUG_MODE]:
                                 with st.expander("Debug Information", expanded=True):
                                     # Show embedding shapes and raw values
                                     st.write("Embedding Analysis:")
@@ -528,7 +538,7 @@ def main():
             st.subheader("Reference:")
 
             # Show reference if enabled
-            if st.session_state.show_reference:
+            if st.session_state[SessionKey.SHOW_REFERENCE]:
                 st.image(
                     recognizer.templates[selected_char]["original"],
                     width=200,
@@ -538,13 +548,13 @@ def main():
             # Dynamic toggle button with unique key
             button_label = (
                 "Hide Reference"
-                if st.session_state.show_reference
+                if st.session_state[SessionKey.SHOW_REFERENCE]
                 else "Show Reference"
             )
             st.button(
                 button_label,
                 type="primary",
-                key=f"ref_toggle_{st.session_state.reference_button_key}",
+                key=f"ref_toggle_{st.session_state[SessionKey.REFERENCE_BUTTON_KEY]}",
                 on_click=toggle_reference,
             )
 
@@ -564,15 +574,15 @@ def main():
 
                     # Show recognition result first
                     st.subheader("Recognition Result")
-                    if confidence >= st.session_state.threshold:
+                    if confidence >= st.session_state[SessionKey.THRESHOLD]:
                         st.success(f"Great job! Similarity score: {confidence:.4f}")
-                    elif confidence >= st.session_state.threshold * 0.7:
+                    elif confidence >= st.session_state[SessionKey.THRESHOLD] * 0.7:
                         st.warning(f"Getting there! Similarity score: {confidence:.4f}")
                     else:
                         st.error(f"Keep practicing! Similarity score: {confidence:.4f}")
 
                     # Only show debug information if debug mode is enabled
-                    if st.session_state.debug_mode:
+                    if st.session_state[SessionKey.DEBUG_MODE]:
                         with st.expander("Debug Information", expanded=True):
                             # Show embedding shapes and raw values
                             st.write("Embedding Analysis:")
