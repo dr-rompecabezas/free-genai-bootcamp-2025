@@ -140,27 +140,19 @@ class MobileNetSitelenPonaRecognizer:
             self.embeddings[char_name] = embedding_result.embeddings[0].embedding
 
     def cosine_similarity(self, a, b):
-        """Calculate cosine similarity between two embeddings"""
-        # Debug print the shapes and first few values
-        st.write("Debug - Embedding shapes:", a.shape, b.shape)
-        st.write("Debug - First few values of a:", a[:5])
-        st.write("Debug - First few values of b:", b[:5])
-
+        """Compute cosine similarity between two embeddings"""
         # Embeddings should already be L2 normalized due to embedder options
         # Just compute dot product for cosine similarity
         similarity = float(np.dot(a, b))
-        st.write("Debug - Raw similarity score:", similarity)
-
+        
+        # Return raw similarity score
         return similarity
 
     def recognize(self, drawn_image, threshold=0.7):
-        """Recognize drawn character using MobileNetV3 embeddings"""
-        # Preprocess input image
-        processed_input = self.preprocess_image(drawn_image)
-
-        # Get embedding for input
-        input_embedding, debug_image = self.get_embedding(processed_input)
-
+        """Recognize drawn character by comparing embeddings"""
+        # Get embedding for drawn image
+        input_embedding, debug_image = self.get_embedding(drawn_image)
+        
         if input_embedding is None:
             return None, 0
 
@@ -178,9 +170,8 @@ class MobileNetSitelenPonaRecognizer:
                 best_score = score
                 best_match = char_name
 
-        # Debug: Show all scores
-        with st.expander("View all similarity scores", expanded=False):
-            st.write(all_scores)
+        # Store scores for debug display
+        self.all_scores = all_scores
 
         if best_score >= threshold:
             return best_match, best_score
@@ -188,110 +179,155 @@ class MobileNetSitelenPonaRecognizer:
 
 
 def main():
-    st.title("Sitelen Pona Learning App (MobileNetV3)")
+    st.title("Sitelen Pona Writing Practice")
 
-    recognizer = MobileNetSitelenPonaRecognizer()
+    # Initialize session state for settings if not exists
+    if 'debug_mode' not in st.session_state:
+        st.session_state.debug_mode = False
+    if 'threshold' not in st.session_state:
+        st.session_state.threshold = 0.7
 
-    # Sidebar for app navigation and parameters
-    mode = st.sidebar.selectbox(
-        "Choose Input Method", ["Draw Character", "Upload Image", "Webcam"]
-    )
+    # Create tabs for main app and settings
+    tab_main, tab_settings = st.tabs(["Practice", "Settings"])
 
-    # Character selection
-    available_chars = sorted(recognizer.templates.keys())
-    selected_char = st.sidebar.selectbox(
-        "Select Character to Practice", available_chars
-    )
+    with tab_settings:
+        st.header("Settings")
+        
+        # Recognition settings
+        st.subheader("Recognition Settings")
+        st.session_state.threshold = st.slider(
+            "Recognition Threshold",
+            min_value=0.0,
+            max_value=1.0,
+            value=st.session_state.threshold,
+            step=0.05,
+            help="Lower values are more lenient, higher values require more precise matches"
+        )
 
-    # Show the template for the selected character
-    col1, col2 = st.columns([2, 3])
-    with col1:
-        st.subheader("Template Reference")
-        show_template = st.button("Show Template")
-        template_container = st.empty()
-        if show_template:
-            template_container.image(
-                recognizer.templates[selected_char]["original"], width=200
+        # Debug settings
+        st.subheader("Developer Options")
+        st.session_state.debug_mode = st.toggle(
+            "Debug Mode",
+            value=st.session_state.debug_mode,
+            help="Show detailed information about image processing and recognition"
+        )
+
+    with tab_main:
+        recognizer = MobileNetSitelenPonaRecognizer()
+
+        # Character selection in main area
+        available_chars = sorted(recognizer.templates.keys())
+        selected_char = st.selectbox(
+            "Select Character to Practice",
+            available_chars,
+            help="Choose a Sitelen Pona character to practice writing"
+        )
+
+        # Input method selection in sidebar
+        mode = st.sidebar.selectbox(
+            "Choose Input Method",
+            ["Draw Character", "Upload Image", "Webcam"]
+        )
+
+        # Main content area - Practice and Reference
+        col1, col2 = st.columns([2, 1])
+
+        with col1:
+            st.subheader("Practice Area:")
+            if mode == "Draw Character":
+                # Canvas for drawing
+                canvas_result = st_canvas(
+                    stroke_width=4,
+                    stroke_color="#000000",
+                    background_color="#FFFFFF",
+                    height=224,
+                    width=224,
+                    drawing_mode="freedraw",
+                    key="canvas",
+                )
+
+        with col2:
+            # Template display
+            st.subheader("Reference:")
+            st.image(
+                recognizer.templates[selected_char]["original"],
+                width=200,
+                caption=f"Template for '{selected_char}'"
             )
-            if st.button("Hide Template"):
-                template_container.empty()
 
-    with col2:
-        st.subheader("Practice Area:")
+        # Results and Debug Container
         if mode == "Draw Character":
-            canvas_result = st_canvas(
-                stroke_width=4,  # Thinner stroke for better detail
-                stroke_color="#000",
-                background_color="#fff",
-                height=224,  # Match model input size
-                width=224,  # Match model input size
-                drawing_mode="freedraw",
-                key="canvas",
-            )
-
             if canvas_result.image_data is not None and st.button("Check My Drawing"):
                 try:
-                    # Get embedding and debug image for drawn character
-                    drawn_embedding, drawn_debug = recognizer.get_embedding(
-                        canvas_result.image_data
-                    )
-
-                    # Get template info
+                    # Get embedding and debug image
+                    drawn_embedding, drawn_debug = recognizer.get_embedding(canvas_result.image_data)
                     template_debug = recognizer.templates[selected_char]["processed"]
                     template_embedding = recognizer.embeddings[selected_char]
+                    confidence = recognizer.cosine_similarity(drawn_embedding, template_embedding)
 
-                    # Show debug information
-                    st.subheader("Debug Information")
-
-                    # Show processed images side by side
-                    debug_col1, debug_col2 = st.columns(2)
-                    with debug_col1:
-                        st.write("Processed Template:")
-                        st.image(template_debug, width=150)
-                    with debug_col2:
-                        st.write("Processed Drawing:")
-                        st.image(drawn_debug, width=150)
-
-                    # Compare embeddings
-                    confidence = recognizer.cosine_similarity(
-                        drawn_embedding, template_embedding
-                    )
-
-                    # Show embedding analysis
-                    with st.expander("Embedding Analysis"):
-                        st.write("Template Embedding Stats:")
-                        st.write(f"- Mean: {np.mean(template_embedding):.4f}")
-                        st.write(f"- Std: {np.std(template_embedding):.4f}")
-                        st.write(f"- Min: {np.min(template_embedding):.4f}")
-                        st.write(f"- Max: {np.max(template_embedding):.4f}")
-
-                        st.write("\nDrawing Embedding Stats:")
-                        st.write(f"- Mean: {np.mean(drawn_embedding):.4f}")
-                        st.write(f"- Std: {np.std(drawn_embedding):.4f}")
-                        st.write(f"- Min: {np.min(drawn_embedding):.4f}")
-                        st.write(f"- Max: {np.max(drawn_embedding):.4f}")
-
-                    # Show final score with more detail
+                    # Show recognition result first
                     st.subheader("Recognition Result")
-                    if confidence >= 0.7:
+                    if confidence >= st.session_state.threshold:
                         st.success(f"Great job! Similarity score: {confidence:.4f}")
-                    elif confidence >= 0.5:
+                    elif confidence >= st.session_state.threshold * 0.7:
                         st.warning(f"Getting there! Similarity score: {confidence:.4f}")
                     else:
                         st.error(f"Keep practicing! Similarity score: {confidence:.4f}")
+
+                    # Only show debug information if debug mode is enabled
+                    if st.session_state.debug_mode:
+                        with st.expander("Debug Information", expanded=True):
+                            # Show embedding shapes and raw values
+                            st.write("Embedding Analysis:")
+                            st.write(f"Embedding shapes: {drawn_embedding.shape}, {template_embedding.shape}")
+                            
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.write("First few values of drawn embedding:")
+                                st.write(drawn_embedding[:5])
+                            with col2:
+                                st.write("First few values of template embedding:")
+                                st.write(template_embedding[:5])
+                            
+                            st.write(f"Raw similarity score: {confidence}")
+                            
+                            # Show processed images side by side
+                            st.write("Processed Images Comparison:")
+                            debug_col1, debug_col2 = st.columns(2)
+                            with debug_col1:
+                                st.write("Template:")
+                                st.image(template_debug, width=150)
+                            with debug_col2:
+                                st.write("Drawing:")
+                                st.image(drawn_debug, width=150)
+
+                            # Show embedding statistics
+                            st.write("Embedding Statistics:")
+                            stats_col1, stats_col2 = st.columns(2)
+                            with stats_col1:
+                                st.write("Template Stats:")
+                                st.write(f"- Mean: {np.mean(template_embedding):.4f}")
+                                st.write(f"- Std: {np.std(template_embedding):.4f}")
+                                st.write(f"- Min: {np.min(template_embedding):.4f}")
+                                st.write(f"- Max: {np.max(template_embedding):.4f}")
+                            with stats_col2:
+                                st.write("Drawing Stats:")
+                                st.write(f"- Mean: {np.mean(drawn_embedding):.4f}")
+                                st.write(f"- Std: {np.std(drawn_embedding):.4f}")
+                                st.write(f"- Min: {np.min(drawn_embedding):.4f}")
+                                st.write(f"- Max: {np.max(drawn_embedding):.4f}")
 
                 except Exception as e:
                     st.error(f"Error processing drawing: {str(e)}")
 
         elif mode == "Upload Image":
-            uploaded_file = st.file_uploader(
-                "Upload your practice image...", type=["png", "jpg", "jpeg"]
-            )
+            # File uploader
+            uploaded_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
             if uploaded_file is not None:
+                # Display uploaded image
                 image = cv2.imdecode(
                     np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR
                 )
-                st.image(image, caption="Uploaded Image", width=300)
 
                 if st.button("Check My Image"):
                     try:
@@ -301,54 +337,66 @@ def main():
                         )
 
                         # Get template info
-                        template_debug = recognizer.templates[selected_char][
-                            "processed"
-                        ]
+                        template_debug = recognizer.templates[selected_char]["processed"]
                         template_embedding = recognizer.embeddings[selected_char]
-
-                        # Show debug information
-                        st.subheader("Debug Information")
-
-                        # Show processed images side by side
-                        debug_col1, debug_col2 = st.columns(2)
-                        with debug_col1:
-                            st.write("Processed Template:")
-                            st.image(template_debug, width=150)
-                        with debug_col2:
-                            st.write("Processed Uploaded Image:")
-                            st.image(uploaded_debug, width=150)
 
                         # Compare embeddings
                         confidence = recognizer.cosine_similarity(
                             uploaded_embedding, template_embedding
                         )
 
-                        # Show embedding analysis
-                        with st.expander("Embedding Analysis"):
-                            st.write("Template Embedding Stats:")
-                            st.write(f"- Mean: {np.mean(template_embedding):.4f}")
-                            st.write(f"- Std: {np.std(template_embedding):.4f}")
-                            st.write(f"- Min: {np.min(template_embedding):.4f}")
-                            st.write(f"- Max: {np.max(template_embedding):.4f}")
-
-                            st.write("\nUploaded Image Embedding Stats:")
-                            st.write(f"- Mean: {np.mean(uploaded_embedding):.4f}")
-                            st.write(f"- Std: {np.std(uploaded_embedding):.4f}")
-                            st.write(f"- Min: {np.min(uploaded_embedding):.4f}")
-                            st.write(f"- Max: {np.max(uploaded_embedding):.4f}")
-
-                        # Show final score with more detail
+                        # Show recognition result first
                         st.subheader("Recognition Result")
-                        if confidence >= 0.7:
+                        if confidence >= st.session_state.threshold:
                             st.success(f"Great job! Similarity score: {confidence:.4f}")
-                        elif confidence >= 0.5:
-                            st.warning(
-                                f"Getting there! Similarity score: {confidence:.4f}"
-                            )
+                        elif confidence >= st.session_state.threshold * 0.7:
+                            st.warning(f"Getting there! Similarity score: {confidence:.4f}")
                         else:
-                            st.error(
-                                f"Keep practicing! Similarity score: {confidence:.4f}"
-                            )
+                            st.error(f"Keep practicing! Similarity score: {confidence:.4f}")
+
+                        # Only show debug information if debug mode is enabled
+                        if st.session_state.debug_mode:
+                            with st.expander("Debug Information", expanded=True):
+                                # Show embedding shapes and raw values
+                                st.write("Embedding Analysis:")
+                                st.write(f"Embedding shapes: {uploaded_embedding.shape}, {template_embedding.shape}")
+                                
+                                col1, col2 = st.columns(2)
+                                with col1:
+                                    st.write("First few values of uploaded embedding:")
+                                    st.write(uploaded_embedding[:5])
+                                with col2:
+                                    st.write("First few values of template embedding:")
+                                    st.write(template_embedding[:5])
+                                
+                                st.write(f"Raw similarity score: {confidence}")
+                                
+                                # Show processed images side by side
+                                st.write("Processed Images Comparison:")
+                                debug_col1, debug_col2 = st.columns(2)
+                                with debug_col1:
+                                    st.write("Template:")
+                                    st.image(template_debug, width=150)
+                                with debug_col2:
+                                    st.write("Uploaded Image:")
+                                    st.image(uploaded_debug, width=150)
+
+                                # Show embedding statistics
+                                st.write("Embedding Statistics:")
+                                stats_col1, stats_col2 = st.columns(2)
+                                with stats_col1:
+                                    st.write("Template Stats:")
+                                    st.write(f"- Mean: {np.mean(template_embedding):.4f}")
+                                    st.write(f"- Std: {np.std(template_embedding):.4f}")
+                                    st.write(f"- Min: {np.min(template_embedding):.4f}")
+                                    st.write(f"- Max: {np.max(template_embedding):.4f}")
+                                with stats_col2:
+                                    st.write("Uploaded Image Stats:")
+                                    st.write(f"- Mean: {np.mean(uploaded_embedding):.4f}")
+                                    st.write(f"- Std: {np.std(uploaded_embedding):.4f}")
+                                    st.write(f"- Min: {np.min(uploaded_embedding):.4f}")
+                                    st.write(f"- Max: {np.max(uploaded_embedding):.4f}")
+
                     except Exception as e:
                         st.error(f"Error processing image: {str(e)}")
 
@@ -367,66 +415,76 @@ def main():
                         )
 
                         # Get template info
-                        template_debug = recognizer.templates[selected_char][
-                            "processed"
-                        ]
+                        template_debug = recognizer.templates[selected_char]["processed"]
                         template_embedding = recognizer.embeddings[selected_char]
-
-                        # Show debug information
-                        st.subheader("Debug Information")
-
-                        # Show processed images side by side
-                        debug_col1, debug_col2 = st.columns(2)
-                        with debug_col1:
-                            st.write("Processed Template:")
-                            st.image(template_debug, width=150)
-                        with debug_col2:
-                            st.write("Processed Captured Image:")
-                            st.image(captured_debug, width=150)
 
                         # Compare embeddings
                         confidence = recognizer.cosine_similarity(
                             captured_embedding, template_embedding
                         )
 
-                        # Show embedding analysis
-                        with st.expander("Embedding Analysis"):
-                            st.write("Template Embedding Stats:")
-                            st.write(f"- Mean: {np.mean(template_embedding):.4f}")
-                            st.write(f"- Std: {np.std(template_embedding):.4f}")
-                            st.write(f"- Min: {np.min(template_embedding):.4f}")
-                            st.write(f"- Max: {np.max(template_embedding):.4f}")
-
-                            st.write("\nCaptured Image Embedding Stats:")
-                            st.write(f"- Mean: {np.mean(captured_embedding):.4f}")
-                            st.write(f"- Std: {np.std(captured_embedding):.4f}")
-                            st.write(f"- Min: {np.min(captured_embedding):.4f}")
-                            st.write(f"- Max: {np.max(captured_embedding):.4f}")
-
-                        # Show final score with more detail
+                        # Show recognition result first
                         st.subheader("Recognition Result")
-                        if confidence >= 0.7:
+                        if confidence >= st.session_state.threshold:
                             st.success(f"Great job! Similarity score: {confidence:.4f}")
-                        elif confidence >= 0.5:
-                            st.warning(
-                                f"Getting there! Similarity score: {confidence:.4f}"
-                            )
+                        elif confidence >= st.session_state.threshold * 0.7:
+                            st.warning(f"Getting there! Similarity score: {confidence:.4f}")
                         else:
-                            st.error(
-                                f"Keep practicing! Similarity score: {confidence:.4f}"
-                            )
+                            st.error(f"Keep practicing! Similarity score: {confidence:.4f}")
+
+                        # Only show debug information if debug mode is enabled
+                        if st.session_state.debug_mode:
+                            with st.expander("Debug Information", expanded=True):
+                                # Show embedding shapes and raw values
+                                st.write("Embedding Analysis:")
+                                st.write(f"Embedding shapes: {captured_embedding.shape}, {template_embedding.shape}")
+                                
+                                col1, col2 = st.columns(2)
+                                with col1:
+                                    st.write("First few values of captured embedding:")
+                                    st.write(captured_embedding[:5])
+                                with col2:
+                                    st.write("First few values of template embedding:")
+                                    st.write(template_embedding[:5])
+                                
+                                st.write(f"Raw similarity score: {confidence}")
+                                
+                                # Show processed images side by side
+                                st.write("Processed Images Comparison:")
+                                debug_col1, debug_col2 = st.columns(2)
+                                with debug_col1:
+                                    st.write("Template:")
+                                    st.image(template_debug, width=150)
+                                with debug_col2:
+                                    st.write("Captured Image:")
+                                    st.image(captured_debug, width=150)
+
+                                # Show embedding statistics
+                                st.write("Embedding Statistics:")
+                                stats_col1, stats_col2 = st.columns(2)
+                                with stats_col1:
+                                    st.write("Template Stats:")
+                                    st.write(f"- Mean: {np.mean(template_embedding):.4f}")
+                                    st.write(f"- Std: {np.std(template_embedding):.4f}")
+                                    st.write(f"- Min: {np.min(template_embedding):.4f}")
+                                    st.write(f"- Max: {np.max(template_embedding):.4f}")
+                                with stats_col2:
+                                    st.write("Captured Image Stats:")
+                                    st.write(f"- Mean: {np.mean(captured_embedding):.4f}")
+                                    st.write(f"- Std: {np.std(captured_embedding):.4f}")
+                                    st.write(f"- Min: {np.min(captured_embedding):.4f}")
+                                    st.write(f"- Max: {np.max(captured_embedding):.4f}")
+
                     except Exception as e:
                         st.error(f"Error processing picture: {str(e)}")
 
-    # Add some helpful tips
-    with st.expander("Tips for Better Recognition"):
-        st.markdown("""
-        - Draw the character as similar to the template as possible
-        - Make sure your drawing is centered
-        - Use clear, bold strokes
-        - Try to maintain similar proportions to the template
-        """)
-
+        # Tips in sidebar
+        with st.sidebar:
+            st.markdown("""
+            ### Tips
+            - Draw the character as clearly as possible
+            - Try to maintain similar proportions to the template
+            """)
 
 if __name__ == "__main__":
     main()
