@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import random
 import urllib.request
 
 import cv2
@@ -193,7 +194,12 @@ def main():
     if "reference_button_key" not in st.session_state:
         st.session_state.reference_button_key = 0
     if "selected_char" not in st.session_state:
-        st.session_state.selected_char = None
+        # Initialize with a random character
+        available_chars = sorted(os.listdir("sitelen_pona_svgs"))
+        available_chars = [
+            f[:-4] for f in available_chars if f.endswith(".svg")
+        ]  # remove .svg
+        st.session_state.selected_char = random.choice(available_chars)
 
     def toggle_reference():
         st.session_state.show_reference = not st.session_state.show_reference
@@ -250,14 +256,28 @@ def main():
     with tab_practice:
         # Character selection in main area
         available_chars = sorted(recognizer.templates.keys())
-        if st.session_state.selected_char is not None:
-            selected_char = st.session_state.selected_char
-        else:
+        
+        # Create two columns with 2:1 ratio
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
             selected_char = st.selectbox(
                 "Select Character to Practice",
                 available_chars,
+                index=available_chars.index(st.session_state.selected_char),
                 help="Choose a Sitelen Pona character to practice writing",
+                key="char_selector",
             )
+        
+        with col2:
+            # Create empty space to push button to bottom
+            st.write("")
+            if st.button("🎲 Random", help="Select a random character to practice"):
+                st.session_state.selected_char = random.choice(available_chars)
+                # Rerun to update the selectbox with the new random selection
+                st.rerun()
+        
+        st.session_state.selected_char = selected_char
 
         # Sidebar settings
         with st.sidebar:
@@ -396,11 +416,11 @@ def main():
                             st.write("Processed Images Comparison:")
                             debug_col1, debug_col2 = st.columns(2)
                             with debug_col1:
-                                st.write("Template:")
-                                st.image(template_debug, width=150)
-                            with debug_col2:
                                 st.write("Drawing:")
                                 st.image(drawn_debug, width=150)
+                            with debug_col2:
+                                st.write("Template:")
+                                st.image(template_debug, width=150)
 
                             # Show embedding statistics
                             st.write("Embedding Statistics:")
@@ -440,9 +460,7 @@ def main():
                         )
 
                         # Get template info
-                        template_debug = recognizer.templates[selected_char][
-                            "processed"
-                        ]
+                        template_debug = recognizer.templates[selected_char]["processed"]
                         template_embedding = recognizer.embeddings[selected_char]
 
                         # Compare embeddings
@@ -455,13 +473,9 @@ def main():
                         if confidence >= st.session_state.threshold:
                             st.success(f"Great job! Similarity score: {confidence:.4f}")
                         elif confidence >= st.session_state.threshold * 0.7:
-                            st.warning(
-                                f"Getting there! Similarity score: {confidence:.4f}"
-                            )
+                            st.warning(f"Getting there! Similarity score: {confidence:.4f}")
                         else:
-                            st.error(
-                                f"Keep practicing! Similarity score: {confidence:.4f}"
-                            )
+                            st.error(f"Keep practicing! Similarity score: {confidence:.4f}")
 
                         # Only show debug information if debug mode is enabled
                         if st.session_state.debug_mode:
@@ -497,17 +511,13 @@ def main():
                                 stats_col1, stats_col2 = st.columns(2)
                                 with stats_col1:
                                     st.write("Template Stats:")
-                                    st.write(
-                                        f"- Mean: {np.mean(template_embedding):.4f}"
-                                    )
+                                    st.write(f"- Mean: {np.mean(template_embedding):.4f}")
                                     st.write(f"- Std: {np.std(template_embedding):.4f}")
                                     st.write(f"- Min: {np.min(template_embedding):.4f}")
                                     st.write(f"- Max: {np.max(template_embedding):.4f}")
                                 with stats_col2:
                                     st.write("Uploaded Image Stats:")
-                                    st.write(
-                                        f"- Mean: {np.mean(uploaded_embedding):.4f}"
-                                    )
+                                    st.write(f"- Mean: {np.mean(uploaded_embedding):.4f}")
                                     st.write(f"- Std: {np.std(uploaded_embedding):.4f}")
                                     st.write(f"- Min: {np.min(uploaded_embedding):.4f}")
                                     st.write(f"- Max: {np.max(uploaded_embedding):.4f}")
@@ -530,9 +540,7 @@ def main():
                         )
 
                         # Get template info
-                        template_debug = recognizer.templates[selected_char][
-                            "processed"
-                        ]
+                        template_debug = recognizer.templates[selected_char]["processed"]
                         template_embedding = recognizer.embeddings[selected_char]
 
                         # Compare embeddings
@@ -545,13 +553,9 @@ def main():
                         if confidence >= st.session_state.threshold:
                             st.success(f"Great job! Similarity score: {confidence:.4f}")
                         elif confidence >= st.session_state.threshold * 0.7:
-                            st.warning(
-                                f"Getting there! Similarity score: {confidence:.4f}"
-                            )
+                            st.warning(f"Getting there! Similarity score: {confidence:.4f}")
                         else:
-                            st.error(
-                                f"Keep practicing! Similarity score: {confidence:.4f}"
-                            )
+                            st.error(f"Keep practicing! Similarity score: {confidence:.4f}")
 
                         # Only show debug information if debug mode is enabled
                         if st.session_state.debug_mode:
@@ -587,17 +591,13 @@ def main():
                                 stats_col1, stats_col2 = st.columns(2)
                                 with stats_col1:
                                     st.write("Template Stats:")
-                                    st.write(
-                                        f"- Mean: {np.mean(template_embedding):.4f}"
-                                    )
+                                    st.write(f"- Mean: {np.mean(template_embedding):.4f}")
                                     st.write(f"- Std: {np.std(template_embedding):.4f}")
                                     st.write(f"- Min: {np.min(template_embedding):.4f}")
                                     st.write(f"- Max: {np.max(template_embedding):.4f}")
                                 with stats_col2:
                                     st.write("Captured Image Stats:")
-                                    st.write(
-                                        f"- Mean: {np.mean(captured_embedding):.4f}"
-                                    )
+                                    st.write(f"- Mean: {np.mean(captured_embedding):.4f}")
                                     st.write(f"- Std: {np.std(captured_embedding):.4f}")
                                     st.write(f"- Min: {np.min(captured_embedding):.4f}")
                                     st.write(f"- Max: {np.max(captured_embedding):.4f}")
