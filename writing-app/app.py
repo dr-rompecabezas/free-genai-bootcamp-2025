@@ -186,6 +186,14 @@ def main():
         st.session_state.debug_mode = False
     if 'threshold' not in st.session_state:
         st.session_state.threshold = 0.7
+    if 'show_reference' not in st.session_state:
+        st.session_state.show_reference = True
+    if 'reference_button_key' not in st.session_state:
+        st.session_state.reference_button_key = 0
+
+    def toggle_reference():
+        st.session_state.show_reference = not st.session_state.show_reference
+        st.session_state.reference_button_key += 1
 
     # Create tabs for main app and settings
     tab_main, tab_settings = st.tabs(["Practice", "Settings"])
@@ -202,6 +210,14 @@ def main():
             value=st.session_state.threshold,
             step=0.05,
             help="Lower values are more lenient, higher values require more precise matches"
+        )
+
+        # Practice settings
+        st.subheader("Practice Settings")
+        st.session_state.show_reference = st.toggle(
+            "Show Reference by Default",
+            value=st.session_state.show_reference,
+            help="When disabled, reference will be hidden until you click 'Show Reference'"
         )
 
         # Debug settings
@@ -247,12 +263,24 @@ def main():
                 )
 
         with col2:
-            # Template display
+            # Template display with visibility control
             st.subheader("Reference:")
-            st.image(
-                recognizer.templates[selected_char]["original"],
-                width=200,
-                caption=f"Template for '{selected_char}'"
+            
+            # Show reference if enabled
+            if st.session_state.show_reference:
+                st.image(
+                    recognizer.templates[selected_char]["original"],
+                    width=200,
+                    caption=f"Template for '{selected_char}'"
+                )
+            
+            # Dynamic toggle button with unique key
+            button_label = "Hide Reference" if st.session_state.show_reference else "Show Reference"
+            st.button(
+                button_label, 
+                type="primary",
+                key=f"ref_toggle_{st.session_state.reference_button_key}",
+                on_click=toggle_reference
             )
 
         # Results and Debug Container
