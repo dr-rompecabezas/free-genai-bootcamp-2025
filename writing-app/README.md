@@ -1,6 +1,35 @@
 # Sitelen Pona Character Recognition App
 
-A Streamlit-based web application for recognizing Sitelen Pona characters through computer vision techniques. The app uses classical computer vision methods like template matching and feature detection instead of machine learning approaches.
+A Streamlit-based web application for recognizing hand-drawn Sitelen Pona characters using computer vision and deep learning. The app leverages MediaPipe's Image Embedder with a MobileNetV3-Small backbone to generate robust visual embeddings, enabling accurate recognition of characters despite variations in drawing style.
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of Contents
+
+- [Features](#features)
+- [Technical Approach](#technical-approach)
+- [Requirements](#requirements)
+- [Setup and Running](#setup-and-running)
+- [Project Structure](#project-structure)
+- [Notes](#notes)
+- [License](#license)
+- [Successful Approach Using MediaPipe with MobileNet](#successful-approach-using-mediapipe-with-mobilenet)
+  - [Key Components](#key-components)
+  - [Advantages](#advantages)
+  - [Implementation Details](#implementation-details)
+  - [Resources and Documentation](#resources-and-documentation)
+- [Unsuccessful Attempts Using OpenCV and MediaPipe with EfficientNet](#unsuccessful-attempts-using-opencv-and-mediapipe-with-efficientnet)
+  - [1. Template Matching (`cv2_matchtemplate.app.py`)](#1-template-matching-cv2_matchtemplateapppy)
+  - [2. Feature Matching (`cv2_orb.app.py`)](#2-feature-matching-cv2_orbapppy)
+  - [3. Shape Matching (`cv2_matchshape.app.py`)](#3-shape-matching-cv2_matchshapeapppy)
+  - [4. MediaPipe with EfficientNet (`mediapipe.app.py`)](#4-mediapipe-with-efficientnet-mediapipeapppy)
+    - [Results and Limitations](#results-and-limitations)
+- [Conclusions and Future Directions](#conclusions-and-future-directions)
+- [Screenshots](#screenshots)
+  - [Acceptable Solution Using MediaPipe with MobileNet](#acceptable-solution-using-mediapipe-with-mobilenet)
+  - [Unacceptable Solutions Using OpenCV and MediaPipe with EfficientNet](#unacceptable-solutions-using-opencv-and-mediapipe-with-efficientnet)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Features
 
@@ -72,7 +101,7 @@ The app will open in your default web browser. You can start drawing characters 
 - `templates/` - Directory containing preprocessed template images
 - `sitelen_pona_svgs/` - Original SVG files for reference
 - `scripts/` - Utility scripts used for initial setup (**Note:** These scripts are included for reference only and are not meant to be run)
-- `models/` - Pre-converted TFLite model (obtained via `download_model.py`)
+- `models/` - Pre-converted TFLite model (obtained via the respective scripts)
 
 ## Notes
 
@@ -82,7 +111,76 @@ The `scripts/` directory contains the original web scraping and image processing
 
 The template images are derived from content available under CC BY-SA 3.0 license from the Sona Pona Wiki.
 
-## Unsuccessful Attempts Using OpenCV
+## Successful Approach Using MediaPipe with MobileNet
+
+After exploring several approaches, we found success using MediaPipe's Image Embedder task with a MobileNetV3-Small backbone. This approach offers several advantages:
+
+### Key Components
+
+1. **Image Preprocessing**:
+
+   - Proper handling of RGBA canvas input with alpha channel masking
+   - Consistent 224x224 image size with aspect ratio preservation
+   - Center-aligned images on white background
+   - Normalized pixel values for model input
+
+2. **Feature Extraction**:
+
+   - MobileNetV3-Small as the backbone architecture
+   - MediaPipe's Image Embedder for generating embeddings
+   - L2 normalization of embeddings for consistent comparison
+
+3. **Similarity Comparison**:
+
+   - Cosine similarity between normalized embeddings
+   - Threshold-based recognition for accepting/rejecting matches
+
+### Advantages
+
+1. **Robust Recognition**:
+
+   - Works well with variations in drawing style
+   - Handles different stroke widths and minor distortions
+   - Position-invariant within the drawing area
+
+2. **Efficient Processing**:
+
+   - MobileNetV3 is optimized for mobile/web deployment
+   - Fast inference times suitable for interactive use
+   - Small model size (~9MB)
+
+3. **Easy Integration**:
+
+   - MediaPipe provides a clean Python API
+   - Built-in image processing and model management
+   - Cross-platform compatibility
+
+### Implementation Details
+
+The system uses a streamlined pipeline:
+
+1. Capture user input (drawing, upload, or webcam)
+2. Preprocess the image maintaining aspect ratio
+3. Generate embeddings using MediaPipe
+4. Compare with template embeddings using cosine similarity
+5. Provide immediate feedback with similarity scores
+
+The UI is built with Streamlit and includes:
+
+- Interactive drawing canvas
+- Template character display
+- Real-time recognition feedback
+- Debugging visualizations for understanding the matching process
+
+### Resources and Documentation
+
+For more information about the MediaPipe Image Embedder:
+
+- [MediaPipe Studio Demo](https://mediapipe-studio.webapps.google.com/studio/demo/image_embedder) - Interactive demo of the Image Embedder
+- [MediaPipe Image Embedder Documentation](https://ai.google.dev/edge/mediapipe/solutions/vision/image_embedder#configurations_options) - Detailed API documentation and configuration options
+- [MobileNetV3-Small Model Details](https://ai.google.dev/edge/mediapipe/solutions/vision/image_embedder#mobilenetv3_model) - Technical specifications and performance characteristics of the MobileNetV3-Small model used for embedding generation
+
+## Unsuccessful Attempts Using OpenCV and MediaPipe with EfficientNet
 
 Several approaches were explored to recognize and evaluate hand-drawn Sitelen Pona characters. The main challenge was finding a computer vision technique that could effectively compare simple geometric shapes while being tolerant of natural variations in human drawing. Each attempt revealed different aspects of the problem and helped inform potential future solutions.
 
@@ -181,26 +279,28 @@ Potential future approaches could include:
 
 ## Screenshots
 
+### Acceptable Solution Using MediaPipe with MobileNet
+
+ -- add screenshots here in GitHub --
+
+### Unacceptable Solutions Using OpenCV and MediaPipe with EfficientNet
+
 Image depicting the debugging of the feature-matching attempt with the OpenCV ORB strategy using sliders to tweak the model's parameters:
 
-<img width="1309" alt="kala-failed-recognition" src="https://github.com/user-attachments/assets/5e4b06d4-7084-4e6e-ad53-21b4f1744b07" />
-
+![kala-failed-recognition](https://github.com/user-attachments/assets/5e4b06d4-7084-4e6e-ad53-21b4f1744b07)
 
 Image showing the contours (red lines) on the canvas frame and template borders rather than surrounding the glyph itself:
 
-<img width="737" alt="debug-open-cv-contours" src="https://github.com/user-attachments/assets/db097fa4-c870-4b3d-b812-503b72a1e6b1" />
-
+![debug-open-cv-contours](https://github.com/user-attachments/assets/db097fa4-c870-4b3d-b812-503b72a1e6b1)
 
 Image showing the contours correctly wrapping the glyphs and excluding the blank area as well as the data being processed by the model:
 
-<img width="727" alt="debug-accuracy-2" src="https://github.com/user-attachments/assets/8fa37fd5-e5ed-4ad6-9cc7-1e250a88030b" />
-
+![debug-low-accuracy-score](https://github.com/user-attachments/assets/8fa37fd5-e5ed-4ad6-9cc7-1e250a88030b)
 
 Image depicting an obstinately low similarity score despite the obvious similarity of the two shapes:
 
-<img width="727" alt="matchShapes_analysis_similarity_score_14" src="https://github.com/user-attachments/assets/da35f72e-d7b9-49e3-9298-52debb98fa79" />
-
+![cv2.matchShapes_analysis_similarity_score_14](https://github.com/user-attachments/assets/da35f72e-d7b9-49e3-9298-52debb98fa79)
 
 Image from the final set of experiments using OpenCV for pre-processing and MediaPipe for the comparison:
 
-<img width="779" alt="tawa-mismatch" src="https://github.com/user-attachments/assets/7f40da0b-cf97-443e-9ad4-a3188d466c42" />
+![tawa-char-mismatch](https://github.com/user-attachments/assets/7f40da0b-cf97-443e-9ad4-a3188d466c42)
