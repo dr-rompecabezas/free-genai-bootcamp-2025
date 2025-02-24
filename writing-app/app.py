@@ -33,6 +33,19 @@ class SessionKey:
     WHITE_GLYPHS = "white_glyphs"
 
 
+# UI element keys
+class UIKey:
+    CANVAS = "canvas"
+    CHAR_SELECTOR = "char_selector"
+    RANDOM_CHAR_BUTTON = "random_char_button"
+    FILE_UPLOADER = "file_uploader"
+    CHECK_DRAWING_BUTTON = "check_drawing_button"
+    CHECK_IMAGE_BUTTON = "check_image_button"
+    CHECK_PICTURE_BUTTON = "check_picture_button"
+    CAMERA_INPUT = "camera_input"
+    DEBUG_EXPANDER = "debug_expander"
+
+
 class MobileNetSitelenPonaRecognizer:
     def __init__(
         self, templates_dir="templates", model_path="models/mobilenet_v3_small.tflite"
@@ -287,13 +300,13 @@ def main():
                 available_chars,
                 index=available_chars.index(st.session_state[SessionKey.SELECTED_CHAR]),
                 help="Choose a Sitelen Pona character to practice writing",
-                key="char_selector",
+                key=UIKey.CHAR_SELECTOR,
             )
         
         with col2:
             # Create empty space to push button to bottom
             st.write("")
-            if st.button("🎲 Random", help="Select a random character to practice"):
+            if st.button("🎲 Random", help="Select a random character to practice", key=UIKey.RANDOM_CHAR_BUTTON):
                 st.session_state[SessionKey.SELECTED_CHAR] = random.choice(available_chars)
                 # Rerun to update the selectbox with the new random selection
                 st.rerun()
@@ -363,13 +376,15 @@ def main():
                     height=224,
                     width=224,
                     drawing_mode="freedraw",
-                    key="canvas",
+                    key=UIKey.CANVAS,
                 )
             elif mode == InputMode.UPLOAD:
                 st.subheader("Upload Area:")
                 # File uploader
                 uploaded_file = st.file_uploader(
-                    "Upload an image", type=["png", "jpg", "jpeg"]
+                    "Upload an image",
+                    type=["png", "jpg", "jpeg"],
+                    key=UIKey.FILE_UPLOADER
                 )
                 if uploaded_file is not None:
                     # Display uploaded image preview
@@ -378,7 +393,7 @@ def main():
                     )
                     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                     st.image(image_rgb, width=224, caption="Preview")
-                    if st.button("Check My Image"):
+                    if st.button("Check My Image", key=UIKey.CHECK_IMAGE_BUTTON):
                         try:
                             # Get embedding and debug image for uploaded image
                             uploaded_embedding, uploaded_debug = recognizer.get_embedding(
@@ -405,7 +420,7 @@ def main():
 
                             # Only show debug information if debug mode is enabled
                             if st.session_state[SessionKey.DEBUG_MODE]:
-                                with st.expander("Debug Information", expanded=True):
+                                with st.expander("Debug Information", expanded=True, key=UIKey.DEBUG_EXPANDER):
                                     # Show embedding shapes and raw values
                                     st.write("Embedding Analysis:")
                                     st.write(
@@ -452,7 +467,7 @@ def main():
                             st.error(f"Error processing image: {str(e)}")
             else:  # Webcam mode
                 st.subheader("Capture Area:")
-                picture = st.camera_input("Take a picture of your drawing")
+                picture = st.camera_input("Take a picture of your drawing", key=UIKey.CAMERA_INPUT)
                 if picture is not None:
                     # Display captured image preview
                     image = cv2.imdecode(
@@ -460,7 +475,7 @@ def main():
                     )
                     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                     st.image(image_rgb, width=224, caption="Preview")
-                    if st.button("Check My Picture"):
+                    if st.button("Check My Picture", key=UIKey.CHECK_PICTURE_BUTTON):
                         try:
                             # Get embedding and debug image for captured image
                             captured_embedding, captured_debug = recognizer.get_embedding(
@@ -487,7 +502,7 @@ def main():
 
                             # Only show debug information if debug mode is enabled
                             if st.session_state[SessionKey.DEBUG_MODE]:
-                                with st.expander("Debug Information", expanded=True):
+                                with st.expander("Debug Information", expanded=True, key=UIKey.DEBUG_EXPANDER):
                                     # Show embedding shapes and raw values
                                     st.write("Embedding Analysis:")
                                     st.write(
@@ -560,7 +575,7 @@ def main():
 
         # Results and Debug Container
         if mode == InputMode.DRAW:
-            if canvas_result.image_data is not None and st.button("Check My Drawing"):
+            if canvas_result.image_data is not None and st.button("Check My Drawing", key=UIKey.CHECK_DRAWING_BUTTON):
                 try:
                     # Get embedding and debug image
                     drawn_embedding, drawn_debug = recognizer.get_embedding(
@@ -583,7 +598,7 @@ def main():
 
                     # Only show debug information if debug mode is enabled
                     if st.session_state[SessionKey.DEBUG_MODE]:
-                        with st.expander("Debug Information", expanded=True):
+                        with st.expander("Debug Information", expanded=True, key=UIKey.DEBUG_EXPANDER):
                             # Show embedding shapes and raw values
                             st.write("Embedding Analysis:")
                             st.write(
