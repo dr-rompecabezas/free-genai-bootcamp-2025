@@ -12,8 +12,5 @@ dependencies = [
     "ruff>=0.9.7",
     "streamlit>=1.42.2",
     "streamlit-drawable-canvas>=0.9.3",
-    "tensorflow>=2.14.0",
-    "tensorflow-hub>=0.16.1",
-    "tensorflow-macos>=2.14.0",
     "watchdog>=6.0.0",
 ]
