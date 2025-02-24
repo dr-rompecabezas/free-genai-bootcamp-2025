@@ -6,14 +6,29 @@ This repository contains assignments completed during ExamPro's free GenAI Bootc
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 ## Directory Structure
 
-- [🎧 `/listening-app` directory](#-listening-app-directory)
 - [🎨 `/writing-app` directory](#-writing-app-directory)
+- [🎧 `/listening-app` directory](#-listening-app-directory)
 - [🪢 `/lang-portal` directory](#-lang-portal-directory)
 - [🧭 `/genai-architecting` directory](#-genai-architecting-directory)
 - [🔭 `/sentence-constructor` directory](#-sentence-constructor-directory)
 - [🧪 `/dev-tools` directory](#-dev-tools-directory)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+## 🎨 `/writing-app` directory
+
+The `/writing-app` directory contains a Streamlit-based character recognition application for Sitelen Pona (Toki Pona's writing system). Key features include:
+
+- Real-time character recognition using MediaPipe's Image Embedder with MobileNetV3-Small
+- Multiple input methods: interactive canvas, webcam capture, and file upload
+- Cosine similarity-based recognition with adjustable confidence threshold
+- Debug mode for visualizing image preprocessing and embedding comparisons
+- Interactive canvas for drawing practice with immediate feedback
+- Comprehensive grid view of all Sitelen Pona glyphs with dark mode support
+- SVG-based rendering for crisp, scalable character display
+- Responsive design with intuitive user interface
+
+The application demonstrates effective use of modern computer vision techniques for handwritten character recognition in language education, with an emphasis on user control and transparency in the recognition process.
+
 ## 🎧 `/listening-app` directory
 
 The `listening-app` directory contains a Streamlit-based application featuring:
@@ -24,18 +39,6 @@ The `listening-app` directory contains a Streamlit-based application featuring:
 - Utility tool for processing YouTube transcripts to support NLP tasks
 
 The application demonstrates practical use of Large Language Models (GPT) and Text-to-Speech technology in language education.
-
-## 🎨 `/writing-app` directory
-
-The `/writing-app` directory contains various attempts at a Streamlit-based character recognition application for Sitelen Pona (Toki Pona's writing system). Key features include:
-
-- Interactive canvas for drawing characters directly in the browser
-- Support for image upload and webcam capture
-- Real-time character recognition using computer vision techniques
-- Template-based matching system with pre-processed library
-- Multiple computer vision approaches documented, from OpenCV to MediaPipe
-
-The experiments demonstrate the fundamental issue that we're trying to do character recognition, but we're treating it as either image matching (OpenCV) or general image classification (EfficientNet).
 
 ## 🪢 `/lang-portal` directory
 
