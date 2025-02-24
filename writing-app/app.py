@@ -46,6 +46,23 @@ class UIKey:
     DEBUG_EXPANDER = "debug_expander"
 
 
+# Debug information text constants
+class DebugText:
+    PREPROCESSING_PIPELINE = """
+    1. Image Loading & Color Space: OpenCV (cv2)
+    2. Resizing & Canvas Centering: OpenCV (cv2)
+    3. Feature Extraction: MobileNetV3 (via MediaPipe Tasks)
+    4. Embedding Comparison: NumPy (cosine similarity)
+    """
+
+    NEURAL_NETWORK_DETAILS = """
+    * **Model**: MobileNetV3-Small (Quantized)
+    * **Input Size**: 224x224 RGB
+    * **Output**: 1x1024 L2-normalized embedding
+    * **Framework**: MediaPipe Tasks Vision
+    """
+
+
 # Special character constants
 class SpecialChar:
     JAKI = "jaki"
@@ -96,6 +113,9 @@ class MobileNetSitelenPonaRecognizer:
 
     def preprocess_image(self, image):
         """Preprocess image for MediaPipe"""
+        debug_steps = {}
+        debug_steps["original"] = image.copy()
+
         # Convert to RGB if needed
         if len(image.shape) == 3:
             if image.shape[2] == 4:  # RGBA
@@ -106,10 +126,13 @@ class MobileNetSitelenPonaRecognizer:
                 white_bg = np.ones_like(rgb) * 255
                 rgb = np.where(mask[:, :, None], rgb, white_bg)
                 image = rgb
+                debug_steps["alpha_handled"] = image.copy()
             elif image.shape[2] == 3:  # BGR
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                debug_steps["rgb_converted"] = image.copy()
         elif len(image.shape) == 2:  # Grayscale
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+            debug_steps["rgb_converted"] = image.copy()
 
         # Resize while maintaining aspect ratio
         target_size = (224, 224)  # MobileNet default size
@@ -124,6 +147,7 @@ class MobileNetSitelenPonaRecognizer:
             new_w = int(new_h * aspect)
 
         resized = cv2.resize(image, (new_w, new_h))
+        debug_steps["aspect_preserved"] = resized.copy()
 
         # Create white canvas of target size (since we're dealing with black text)
         canvas = np.ones((target_size[1], target_size[0], 3), dtype=np.uint8) * 255
@@ -132,20 +156,18 @@ class MobileNetSitelenPonaRecognizer:
         y_offset = (target_size[1] - new_h) // 2
         x_offset = (target_size[0] - new_w) // 2
         canvas[y_offset : y_offset + new_h, x_offset : x_offset + new_w] = resized
+        debug_steps["centered"] = canvas.copy()
 
         # Normalize pixel values to [0, 1]
         processed = canvas.astype(np.float32) / 255.0
 
-        return processed
+        return processed, debug_steps
 
     def get_embedding(self, image):
         """Get embedding from preprocessed image using MediaPipe"""
         try:
             # Preprocess and create MediaPipe image
-            processed = self.preprocess_image(image)
-
-            # For debugging, return the processed image too
-            debug_image = (processed * 255).astype(np.uint8)
+            processed, debug_steps = self.preprocess_image(image)
 
             # Convert to uint8 for MediaPipe (it doesn't like float input)
             mp_input = (processed * 255).astype(np.uint8)
@@ -155,7 +177,7 @@ class MobileNetSitelenPonaRecognizer:
             embedding_result = self.embedder.embed(mp_image)
 
             # Return the embedding values (already a numpy array) and debug image
-            return embedding_result.embeddings[0].embedding, debug_image
+            return embedding_result.embeddings[0].embedding, debug_steps
         except Exception as e:
             st.error(f"Failed to get embedding: {str(e)}")
             raise
@@ -169,7 +191,7 @@ class MobileNetSitelenPonaRecognizer:
             # Load and preprocess the image
             original = cv2.imread(str(template_file))
             original = cv2.cvtColor(original, cv2.COLOR_BGR2RGB)
-            processed = self.preprocess_image(original)
+            processed = self.preprocess_image(original)[0]
 
             # Store images for display
             self.templates[char_name] = {
@@ -197,7 +219,7 @@ class MobileNetSitelenPonaRecognizer:
     def recognize(self, drawn_image, threshold=0.7):
         """Recognize drawn character by comparing embeddings"""
         # Get embedding for drawn image
-        input_embedding, debug_image = self.get_embedding(drawn_image)
+        input_embedding, debug_steps = self.get_embedding(drawn_image)
 
         if input_embedding is None:
             return None, 0
@@ -420,7 +442,7 @@ def main():
                                 return
 
                             # Get embedding and debug image for uploaded image
-                            uploaded_embedding, uploaded_debug = (
+                            uploaded_embedding, uploaded_debug_steps = (
                                 recognizer.get_embedding(image)
                             )
 
@@ -455,15 +477,30 @@ def main():
 
                             # Only show debug information if debug mode is enabled
                             if st.session_state[SessionKey.DEBUG_MODE]:
-                                with st.expander(
-                                    "Debug Information",
-                                    expanded=True,
-                                    key=UIKey.DEBUG_EXPANDER,
-                                ):
-                                    # Show embedding shapes and raw values
-                                    st.write("Embedding Analysis:")
+                                with st.expander("Debug Information", expanded=True):
+                                    # Show preprocessing steps
+                                    st.subheader("Preprocessing Pipeline")
+                                    st.write(DebugText.PREPROCESSING_PIPELINE)
+
+                                    st.subheader("Preprocessing Steps")
+                                    cols = st.columns(len(uploaded_debug_steps))
+                                    for col, (step_name, step_img) in zip(
+                                        cols, uploaded_debug_steps.items()
+                                    ):
+                                        with col:
+                                            st.write(
+                                                step_name.replace("_", " ").title()
+                                            )
+                                            st.image(step_img, use_container_width=True)
+
+                                    # Show embedding analysis
+                                    st.subheader("Neural Network Details")
+                                    st.markdown(DebugText.NEURAL_NETWORK_DETAILS)
+
+                                    st.subheader("Embedding Analysis")
+                                    st.write("Embedding shapes:")
                                     st.write(
-                                        f"Embedding shapes: {uploaded_embedding.shape}, {template_embedding.shape}"
+                                        f"{uploaded_embedding.shape}, {template_embedding.shape}"
                                     )
 
                                     col1, col2 = st.columns(2)
@@ -488,7 +525,12 @@ def main():
                                         st.image(template_debug, width=150)
                                     with debug_col2:
                                         st.write("Uploaded Image:")
-                                        st.image(uploaded_debug, width=150)
+                                        st.image(
+                                            (
+                                                uploaded_debug_steps["centered"] * 255
+                                            ).astype(np.uint8),
+                                            width=150,
+                                        )
 
                                     # Show embedding statistics
                                     st.write("Embedding Statistics:")
@@ -548,7 +590,7 @@ def main():
                                 return
 
                             # Get embedding and debug image for captured image
-                            captured_embedding, captured_debug = (
+                            captured_embedding, captured_debug_steps = (
                                 recognizer.get_embedding(image)
                             )
 
@@ -583,15 +625,30 @@ def main():
 
                             # Only show debug information if debug mode is enabled
                             if st.session_state[SessionKey.DEBUG_MODE]:
-                                with st.expander(
-                                    "Debug Information",
-                                    expanded=True,
-                                    key=UIKey.DEBUG_EXPANDER,
-                                ):
-                                    # Show embedding shapes and raw values
-                                    st.write("Embedding Analysis:")
+                                with st.expander("Debug Information", expanded=True):
+                                    # Show preprocessing steps
+                                    st.subheader("Preprocessing Pipeline")
+                                    st.write(DebugText.PREPROCESSING_PIPELINE)
+
+                                    st.subheader("Preprocessing Steps")
+                                    cols = st.columns(len(captured_debug_steps))
+                                    for col, (step_name, step_img) in zip(
+                                        cols, captured_debug_steps.items()
+                                    ):
+                                        with col:
+                                            st.write(
+                                                step_name.replace("_", " ").title()
+                                            )
+                                            st.image(step_img, use_container_width=True)
+
+                                    # Show embedding analysis
+                                    st.subheader("Neural Network Details")
+                                    st.markdown(DebugText.NEURAL_NETWORK_DETAILS)
+
+                                    st.subheader("Embedding Analysis")
+                                    st.write("Embedding shapes:")
                                     st.write(
-                                        f"Embedding shapes: {captured_embedding.shape}, {template_embedding.shape}"
+                                        f"{captured_embedding.shape}, {template_embedding.shape}"
                                     )
 
                                     col1, col2 = st.columns(2)
@@ -616,7 +673,12 @@ def main():
                                         st.image(template_debug, width=150)
                                     with debug_col2:
                                         st.write("Captured Image:")
-                                        st.image(captured_debug, width=150)
+                                        st.image(
+                                            (
+                                                captured_debug_steps["centered"] * 255
+                                            ).astype(np.uint8),
+                                            width=150,
+                                        )
 
                                     # Show embedding statistics
                                     st.write("Embedding Statistics:")
@@ -692,7 +754,7 @@ def main():
                         return
 
                     # Get embedding and debug image
-                    drawn_embedding, drawn_debug = recognizer.get_embedding(
+                    drawn_embedding, drawn_debug_steps = recognizer.get_embedding(
                         canvas_result.image_data
                     )
                     template_debug = recognizer.templates[selected_char]["processed"]
@@ -712,13 +774,28 @@ def main():
 
                     # Only show debug information if debug mode is enabled
                     if st.session_state[SessionKey.DEBUG_MODE]:
-                        with st.expander(
-                            "Debug Information", expanded=True, key=UIKey.DEBUG_EXPANDER
-                        ):
-                            # Show embedding shapes and raw values
-                            st.write("Embedding Analysis:")
+                        with st.expander("Debug Information", expanded=True):
+                            # Show preprocessing steps
+                            st.subheader("Preprocessing Pipeline")
+                            st.write(DebugText.PREPROCESSING_PIPELINE)
+
+                            st.subheader("Preprocessing Steps")
+                            cols = st.columns(len(drawn_debug_steps))
+                            for col, (step_name, step_img) in zip(
+                                cols, drawn_debug_steps.items()
+                            ):
+                                with col:
+                                    st.write(step_name.replace("_", " ").title())
+                                    st.image(step_img, use_container_width=True)
+
+                            # Show embedding analysis
+                            st.subheader("Neural Network Details")
+                            st.markdown(DebugText.NEURAL_NETWORK_DETAILS)
+
+                            st.subheader("Embedding Analysis")
+                            st.write("Embedding shapes:")
                             st.write(
-                                f"Embedding shapes: {drawn_embedding.shape}, {template_embedding.shape}"
+                                f"{drawn_embedding.shape}, {template_embedding.shape}"
                             )
 
                             col1, col2 = st.columns(2)
@@ -736,7 +813,12 @@ def main():
                             debug_col1, debug_col2 = st.columns(2)
                             with debug_col1:
                                 st.write("Drawing:")
-                                st.image(drawn_debug, width=150)
+                                st.image(
+                                    (drawn_debug_steps["centered"] * 255).astype(
+                                        np.uint8
+                                    ),
+                                    width=150,
+                                )
                             with debug_col2:
                                 st.write("Template:")
                                 st.image(template_debug, width=150)
@@ -745,17 +827,17 @@ def main():
                             st.write("Embedding Statistics:")
                             stats_col1, stats_col2 = st.columns(2)
                             with stats_col1:
-                                st.write("Template Stats:")
-                                st.write(f"- Mean: {np.mean(template_embedding):.4f}")
-                                st.write(f"- Std: {np.std(template_embedding):.4f}")
-                                st.write(f"- Min: {np.min(template_embedding):.4f}")
-                                st.write(f"- Max: {np.max(template_embedding):.4f}")
-                            with stats_col2:
                                 st.write("Drawing Stats:")
                                 st.write(f"- Mean: {np.mean(drawn_embedding):.4f}")
                                 st.write(f"- Std: {np.std(drawn_embedding):.4f}")
                                 st.write(f"- Min: {np.min(drawn_embedding):.4f}")
                                 st.write(f"- Max: {np.max(drawn_embedding):.4f}")
+                            with stats_col2:
+                                st.write("Template Stats:")
+                                st.write(f"- Mean: {np.mean(template_embedding):.4f}")
+                                st.write(f"- Std: {np.std(template_embedding):.4f}")
+                                st.write(f"- Min: {np.min(template_embedding):.4f}")
+                                st.write(f"- Max: {np.max(template_embedding):.4f}")
 
                 except Exception as e:
                     st.error(f"Error processing drawing: {str(e)}")
