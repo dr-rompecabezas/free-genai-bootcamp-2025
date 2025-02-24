@@ -178,3 +178,29 @@ Potential future approaches could include:
 - Training a custom CNN on a dataset of hand-drawn Sitelen Pona characters
 - Using a pre-trained handwriting recognition model fine-tuned for Sitelen Pona
 - Developing custom shape descriptors that better capture the essential features of each character
+
+## Screenshots
+
+Image depicting the debugging of the feature-matching attempt with the OpenCV ORB strategy using sliders to tweak the model's parameters:
+
+<img width="1309" alt="kala-failed-recognition" src="https://github.com/user-attachments/assets/5e4b06d4-7084-4e6e-ad53-21b4f1744b07" />
+
+
+Image showing the contours (red lines) on the canvas frame and template borders rather than surrounding the glyph itself:
+
+<img width="737" alt="debug-open-cv-contours" src="https://github.com/user-attachments/assets/db097fa4-c870-4b3d-b812-503b72a1e6b1" />
+
+
+Image showing the contours correctly wrapping the glyphs and excluding the blank area as well as the data being processed by the model:
+
+<img width="727" alt="debug-accuracy-2" src="https://github.com/user-attachments/assets/8fa37fd5-e5ed-4ad6-9cc7-1e250a88030b" />
+
+
+Image depicting an obstinately low similarity score despite the obvious similarity of the two shapes:
+
+<img width="727" alt="matchShapes_analysis_similarity_score_14" src="https://github.com/user-attachments/assets/da35f72e-d7b9-49e3-9298-52debb98fa79" />
+
+
+Image from the final set of experiments using OpenCV for pre-processing and MediaPipe for the comparison:
+
+<img width="779" alt="tawa-mismatch" src="https://github.com/user-attachments/assets/7f40da0b-cf97-443e-9ad4-a3188d466c42" />
