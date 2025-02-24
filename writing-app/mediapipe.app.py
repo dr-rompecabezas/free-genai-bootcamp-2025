@@ -3,7 +3,6 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import numpy as np
-from PIL import Image
 from streamlit_drawable_canvas import st_canvas
 import cv2
 from pathlib import Path

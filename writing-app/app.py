@@ -7,8 +7,6 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import urllib.request
-from PIL import Image
-import math
 
 
 class MobileNetSitelenPonaRecognizer:
