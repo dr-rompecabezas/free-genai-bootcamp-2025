@@ -46,6 +46,15 @@ class UIKey:
     DEBUG_EXPANDER = "debug_expander"
 
 
+# Special character constants
+class SpecialChar:
+    JAKI = "jaki"
+    JAKI_DESCRIPTION = """
+    The Sitelen Pona glyph for jaki is a scribble, and it may be drawn in any way as long as it is recognizable.
+    It tends to be drawn as a single stroke dense with overlaps, (mostly) curvy lines, and loops, tight corners, or zigzags.
+    """
+
+
 class MobileNetSitelenPonaRecognizer:
     def __init__(
         self, templates_dir="templates", model_path="models/mobilenet_v3_small.tflite"
@@ -236,7 +245,9 @@ def main():
         st.session_state[SessionKey.SELECTED_CHAR] = random.choice(available_chars)
 
     def toggle_reference():
-        st.session_state[SessionKey.SHOW_REFERENCE] = not st.session_state[SessionKey.SHOW_REFERENCE]
+        st.session_state[SessionKey.SHOW_REFERENCE] = not st.session_state[
+            SessionKey.SHOW_REFERENCE
+        ]
         st.session_state[SessionKey.REFERENCE_BUTTON_KEY] += 1
 
     # Main app
@@ -290,10 +301,10 @@ def main():
     with tab_practice:
         # Character selection in main area
         available_chars = sorted(recognizer.templates.keys())
-        
+
         # Create two columns with 2:1 ratio
         col1, col2 = st.columns([2, 1])
-        
+
         with col1:
             selected_char = st.selectbox(
                 "Select Character to Practice",
@@ -302,23 +313,27 @@ def main():
                 help="Choose a Sitelen Pona character to practice writing",
                 key=UIKey.CHAR_SELECTOR,
             )
-        
+
         with col2:
             # Create empty space to push button to bottom
             st.write("")
-            if st.button("🎲 Random", help="Select a random character to practice", key=UIKey.RANDOM_CHAR_BUTTON):
-                st.session_state[SessionKey.SELECTED_CHAR] = random.choice(available_chars)
+            if st.button(
+                "🎲 Random",
+                help="Select a random character to practice",
+                key=UIKey.RANDOM_CHAR_BUTTON,
+            ):
+                st.session_state[SessionKey.SELECTED_CHAR] = random.choice(
+                    available_chars
+                )
                 # Rerun to update the selectbox with the new random selection
                 st.rerun()
-        
+
         st.session_state[SessionKey.SELECTED_CHAR] = selected_char
 
         # Sidebar settings
         with st.sidebar:
             # Input method selection
-            mode = st.selectbox(
-                "Choose Input Method", InputMode.all_modes()
-            )
+            mode = st.selectbox("Choose Input Method", InputMode.all_modes())
 
             st.divider()
 
@@ -384,7 +399,7 @@ def main():
                 uploaded_file = st.file_uploader(
                     "Upload an image",
                     type=["png", "jpg", "jpeg"],
-                    key=UIKey.FILE_UPLOADER
+                    key=UIKey.FILE_UPLOADER,
                 )
                 if uploaded_file is not None:
                     # Display uploaded image preview
@@ -395,13 +410,24 @@ def main():
                     st.image(image_rgb, width=224, caption="Preview")
                     if st.button("Check My Image", key=UIKey.CHECK_IMAGE_BUTTON):
                         try:
+                            # Special handling for 'jaki' character
+                            if selected_char == SpecialChar.JAKI:
+                                st.success(
+                                    "Perfect! 🎨 The 'jaki' character is special."
+                                )
+                                st.info(SpecialChar.JAKI_DESCRIPTION)
+                                st.balloons()
+                                return
+
                             # Get embedding and debug image for uploaded image
-                            uploaded_embedding, uploaded_debug = recognizer.get_embedding(
-                                image
+                            uploaded_embedding, uploaded_debug = (
+                                recognizer.get_embedding(image)
                             )
 
                             # Get template info
-                            template_debug = recognizer.templates[selected_char]["processed"]
+                            template_debug = recognizer.templates[selected_char][
+                                "processed"
+                            ]
                             template_embedding = recognizer.embeddings[selected_char]
 
                             # Compare embeddings
@@ -412,15 +438,28 @@ def main():
                             # Show recognition result first
                             st.subheader("Recognition Result")
                             if confidence >= st.session_state[SessionKey.THRESHOLD]:
-                                st.success(f"Great job! Similarity score: {confidence:.4f}")
-                            elif confidence >= st.session_state[SessionKey.THRESHOLD] * 0.7:
-                                st.warning(f"Getting there! Similarity score: {confidence:.4f}")
+                                st.success(
+                                    f"Great job! Similarity score: {confidence:.4f}"
+                                )
+                            elif (
+                                confidence
+                                >= st.session_state[SessionKey.THRESHOLD] * 0.7
+                            ):
+                                st.warning(
+                                    f"Getting there! Similarity score: {confidence:.4f}"
+                                )
                             else:
-                                st.error(f"Keep practicing! Similarity score: {confidence:.4f}")
+                                st.error(
+                                    f"Keep practicing! Similarity score: {confidence:.4f}"
+                                )
 
                             # Only show debug information if debug mode is enabled
                             if st.session_state[SessionKey.DEBUG_MODE]:
-                                with st.expander("Debug Information", expanded=True, key=UIKey.DEBUG_EXPANDER):
+                                with st.expander(
+                                    "Debug Information",
+                                    expanded=True,
+                                    key=UIKey.DEBUG_EXPANDER,
+                                ):
                                     # Show embedding shapes and raw values
                                     st.write("Embedding Analysis:")
                                     st.write(
@@ -429,10 +468,14 @@ def main():
 
                                     col1, col2 = st.columns(2)
                                     with col1:
-                                        st.write("First few values of uploaded embedding:")
+                                        st.write(
+                                            "First few values of uploaded embedding:"
+                                        )
                                         st.write(uploaded_embedding[:5])
                                     with col2:
-                                        st.write("First few values of template embedding:")
+                                        st.write(
+                                            "First few values of template embedding:"
+                                        )
                                         st.write(template_embedding[:5])
 
                                     st.write(f"Raw similarity score: {confidence}")
@@ -452,22 +495,40 @@ def main():
                                     stats_col1, stats_col2 = st.columns(2)
                                     with stats_col1:
                                         st.write("Template Stats:")
-                                        st.write(f"- Mean: {np.mean(template_embedding):.4f}")
-                                        st.write(f"- Std: {np.std(template_embedding):.4f}")
-                                        st.write(f"- Min: {np.min(template_embedding):.4f}")
-                                        st.write(f"- Max: {np.max(template_embedding):.4f}")
+                                        st.write(
+                                            f"- Mean: {np.mean(template_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Std: {np.std(template_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Min: {np.min(template_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Max: {np.max(template_embedding):.4f}"
+                                        )
                                     with stats_col2:
                                         st.write("Uploaded Image Stats:")
-                                        st.write(f"- Mean: {np.mean(uploaded_embedding):.4f}")
-                                        st.write(f"- Std: {np.std(uploaded_embedding):.4f}")
-                                        st.write(f"- Min: {np.min(uploaded_embedding):.4f}")
-                                        st.write(f"- Max: {np.max(uploaded_embedding):.4f}")
+                                        st.write(
+                                            f"- Mean: {np.mean(uploaded_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Std: {np.std(uploaded_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Min: {np.min(uploaded_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Max: {np.max(uploaded_embedding):.4f}"
+                                        )
 
                         except Exception as e:
                             st.error(f"Error processing image: {str(e)}")
             else:  # Webcam mode
                 st.subheader("Capture Area:")
-                picture = st.camera_input("Take a picture of your drawing", key=UIKey.CAMERA_INPUT)
+                picture = st.camera_input(
+                    "Take a picture of your drawing", key=UIKey.CAMERA_INPUT
+                )
                 if picture is not None:
                     # Display captured image preview
                     image = cv2.imdecode(
@@ -477,13 +538,24 @@ def main():
                     st.image(image_rgb, width=224, caption="Preview")
                     if st.button("Check My Picture", key=UIKey.CHECK_PICTURE_BUTTON):
                         try:
+                            # Special handling for 'jaki' character
+                            if selected_char == SpecialChar.JAKI:
+                                st.success(
+                                    "Perfect! 🎨 The 'jaki' character is special."
+                                )
+                                st.info(SpecialChar.JAKI_DESCRIPTION)
+                                st.balloons()
+                                return
+
                             # Get embedding and debug image for captured image
-                            captured_embedding, captured_debug = recognizer.get_embedding(
-                                image
+                            captured_embedding, captured_debug = (
+                                recognizer.get_embedding(image)
                             )
 
                             # Get template info
-                            template_debug = recognizer.templates[selected_char]["processed"]
+                            template_debug = recognizer.templates[selected_char][
+                                "processed"
+                            ]
                             template_embedding = recognizer.embeddings[selected_char]
 
                             # Compare embeddings
@@ -494,15 +566,28 @@ def main():
                             # Show recognition result first
                             st.subheader("Recognition Result")
                             if confidence >= st.session_state[SessionKey.THRESHOLD]:
-                                st.success(f"Great job! Similarity score: {confidence:.4f}")
-                            elif confidence >= st.session_state[SessionKey.THRESHOLD] * 0.7:
-                                st.warning(f"Getting there! Similarity score: {confidence:.4f}")
+                                st.success(
+                                    f"Great job! Similarity score: {confidence:.4f}"
+                                )
+                            elif (
+                                confidence
+                                >= st.session_state[SessionKey.THRESHOLD] * 0.7
+                            ):
+                                st.warning(
+                                    f"Getting there! Similarity score: {confidence:.4f}"
+                                )
                             else:
-                                st.error(f"Keep practicing! Similarity score: {confidence:.4f}")
+                                st.error(
+                                    f"Keep practicing! Similarity score: {confidence:.4f}"
+                                )
 
                             # Only show debug information if debug mode is enabled
                             if st.session_state[SessionKey.DEBUG_MODE]:
-                                with st.expander("Debug Information", expanded=True, key=UIKey.DEBUG_EXPANDER):
+                                with st.expander(
+                                    "Debug Information",
+                                    expanded=True,
+                                    key=UIKey.DEBUG_EXPANDER,
+                                ):
                                     # Show embedding shapes and raw values
                                     st.write("Embedding Analysis:")
                                     st.write(
@@ -511,10 +596,14 @@ def main():
 
                                     col1, col2 = st.columns(2)
                                     with col1:
-                                        st.write("First few values of captured embedding:")
+                                        st.write(
+                                            "First few values of captured embedding:"
+                                        )
                                         st.write(captured_embedding[:5])
                                     with col2:
-                                        st.write("First few values of template embedding:")
+                                        st.write(
+                                            "First few values of template embedding:"
+                                        )
                                         st.write(template_embedding[:5])
 
                                     st.write(f"Raw similarity score: {confidence}")
@@ -534,16 +623,32 @@ def main():
                                     stats_col1, stats_col2 = st.columns(2)
                                     with stats_col1:
                                         st.write("Template Stats:")
-                                        st.write(f"- Mean: {np.mean(template_embedding):.4f}")
-                                        st.write(f"- Std: {np.std(template_embedding):.4f}")
-                                        st.write(f"- Min: {np.min(template_embedding):.4f}")
-                                        st.write(f"- Max: {np.max(template_embedding):.4f}")
+                                        st.write(
+                                            f"- Mean: {np.mean(template_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Std: {np.std(template_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Min: {np.min(template_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Max: {np.max(template_embedding):.4f}"
+                                        )
                                     with stats_col2:
                                         st.write("Captured Image Stats:")
-                                        st.write(f"- Mean: {np.mean(captured_embedding):.4f}")
-                                        st.write(f"- Std: {np.std(captured_embedding):.4f}")
-                                        st.write(f"- Min: {np.min(captured_embedding):.4f}")
-                                        st.write(f"- Max: {np.max(captured_embedding):.4f}")
+                                        st.write(
+                                            f"- Mean: {np.mean(captured_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Std: {np.std(captured_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Min: {np.min(captured_embedding):.4f}"
+                                        )
+                                        st.write(
+                                            f"- Max: {np.max(captured_embedding):.4f}"
+                                        )
 
                         except Exception as e:
                             st.error(f"Error processing picture: {str(e)}")
@@ -575,8 +680,17 @@ def main():
 
         # Results and Debug Container
         if mode == InputMode.DRAW:
-            if canvas_result.image_data is not None and st.button("Check My Drawing", key=UIKey.CHECK_DRAWING_BUTTON):
+            if canvas_result.image_data is not None and st.button(
+                "Check My Drawing", key=UIKey.CHECK_DRAWING_BUTTON
+            ):
                 try:
+                    # Special handling for 'jaki' character
+                    if selected_char == SpecialChar.JAKI:
+                        st.success("Perfect! 🎨 The 'jaki' character is special.")
+                        st.info(SpecialChar.JAKI_DESCRIPTION)
+                        st.balloons()
+                        return
+
                     # Get embedding and debug image
                     drawn_embedding, drawn_debug = recognizer.get_embedding(
                         canvas_result.image_data
@@ -598,7 +712,9 @@ def main():
 
                     # Only show debug information if debug mode is enabled
                     if st.session_state[SessionKey.DEBUG_MODE]:
-                        with st.expander("Debug Information", expanded=True, key=UIKey.DEBUG_EXPANDER):
+                        with st.expander(
+                            "Debug Information", expanded=True, key=UIKey.DEBUG_EXPANDER
+                        ):
                             # Show embedding shapes and raw values
                             st.write("Embedding Analysis:")
                             st.write(
