@@ -344,7 +344,7 @@ To use this version:
 
    ```bash
    cd ../experiments  # Back to the experiments directory
-   streamlit run mediapipe.app.py
+   streamlit run mp_efficientnet.app.py
    ```
 
 #### Results and Limitations
