@@ -1,6 +1,5 @@
 """Tests for the Sitelen Pona Writing Practice App."""
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 import sys
 
@@ -108,7 +107,7 @@ def test_reference_toggle_interaction(app: AppTest):
     toggle_button = next(
         button for button in app.button if button.label == "Hide Reference"
     )
-    assert toggle_button.key == f"ref_toggle_0"
+    assert toggle_button.key == "ref_toggle_0"
 
     # Click the button to trigger toggle_reference callback
     toggle_button.click()
@@ -116,7 +115,7 @@ def test_reference_toggle_interaction(app: AppTest):
 
     # Find the new button by its key
     toggle_button = next(
-        button for button in app.button if button.key == f"ref_toggle_1"
+        button for button in app.button if button.key == "ref_toggle_1"
     )
     assert toggle_button.label == "Show Reference"
     assert not app.session_state[SessionKey.SHOW_REFERENCE]
