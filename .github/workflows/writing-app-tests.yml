@@ -54,7 +54,8 @@ jobs:
 
     - name: Run tests with Debug Logging
       run: |
-        pytest tests/test_app.py -v --log-cli-level=INFO
+        cd ${{ github.workspace }}/writing-app
+        PYTHONPATH=${{ github.workspace }}/writing-app pytest tests/test_app.py -v --log-cli-level=INFO --rootdir=${{ github.workspace }}/writing-app
 
     - name: Run Streamlit App Action (Recommended)
       uses: streamlit/streamlit-app-action@v0.0.3
