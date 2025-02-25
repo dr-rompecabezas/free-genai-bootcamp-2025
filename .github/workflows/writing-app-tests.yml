@@ -24,25 +24,13 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        cache: 'pip'
 
-    - name: Install `uv`
+    - name: Install dependencies with `pip`
       run: |
-        curl -fsSL https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.local/bin" >> $GITHUB_PATH  # Ensure `uv` is in PATH
-        uv --version  # Verify installation
-
-    - name: Sync dependencies with `uv`
-      run: |
-        uv sync
-        uv pip list  # Debugging step to check installed packages
-
-    - name: Set up virtual environment paths
-      run: |
-        echo "VIRTUAL_ENV=$PWD/.venv" >> $GITHUB_ENV
-        echo "$PWD/.venv/bin" >> $GITHUB_PATH
-        echo "Python binary: $(which python)"
-        echo "Streamlit binary: $(which streamlit)"
-        echo "Pytest binary: $(which pytest)"
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip list  # Debugging step to check installed packages
 
     - name: Install system dependencies
       run: |
@@ -57,7 +45,7 @@ jobs:
         STREAMLIT_SERVER_HEADLESS: true
         PYTHONPATH: ${{ github.workspace }}/writing-app
       run: |
-        .venv/bin/streamlit run app.py &
+        streamlit run app.py &
         sleep 3  # Allow time for Streamlit to initialize
 
     - name: Create models directory
@@ -65,7 +53,7 @@ jobs:
 
     - name: Run tests with Debug Logging
       run: |
-        .venv/bin/pytest tests/test_app.py -v --log-cli-level=INFO
+        pytest tests/test_app.py -v --log-cli-level=INFO
 
     - name: Run Streamlit App Action (Recommended)
       uses: streamlit/streamlit-app-action@v0.0.3
