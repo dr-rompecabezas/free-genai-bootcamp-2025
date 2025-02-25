@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 import random
-import urllib.request
 
 import cv2
 import mediapipe as mp
@@ -96,10 +95,11 @@ class MobileNetSitelenPonaRecognizer:
     def download_and_load_model(self, model_path):
         """Download and load the MobileNetV3 TFLite model using MediaPipe"""
         try:
-            # Download model if not already present
             if not Path(model_path).exists():
-                model_url = "https://storage.googleapis.com/mediapipe-assets/mobile_net_v3_small_224_224_quant.tflite"
-                urllib.request.urlretrieve(model_url, model_path)
+                raise FileNotFoundError(
+                    f"Model file not found at {model_path}. Please download the model manually from "
+                    "https://storage.googleapis.com/mediapipe-assets/mobile_net_v3_small_224_224_quant.tflite"
+                )
 
             # Create MediaPipe Image Embedder with proper options
             base_options = python.BaseOptions(model_asset_path=model_path)
