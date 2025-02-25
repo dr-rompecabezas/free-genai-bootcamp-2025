@@ -1,5 +1,7 @@
 # Sitelen Pona Character Recognition App
 
+[![Writing App Tests](https://github.com/dr-rompecabezas/free-genai-bootcamp-2025/actions/workflows/writing-app-tests.yml/badge.svg)](https://github.com/dr-rompecabezas/free-genai-bootcamp-2025/actions/workflows/writing-app-tests.yml)
+
 A Streamlit-based web application for recognizing hand-drawn Sitelen Pona characters using computer vision and deep learning. The app leverages MediaPipe's Image Embedder with a MobileNetV3-Small backbone to generate robust visual embeddings, enabling accurate recognition of characters despite variations in drawing style.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
