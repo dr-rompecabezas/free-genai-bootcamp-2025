@@ -248,7 +248,13 @@ class MobileNetSitelenPonaRecognizer:
         return None, best_score
 
 
+def create_recognizer():
+    """Create and return a MobileNetSitelenPonaRecognizer instance."""
+    return MobileNetSitelenPonaRecognizer()
+
+
 def main():
+    """Main function to run the Streamlit app"""
     st.title("Sitelen Pona Writing Practice")
 
     # Initialize session state for settings if not exists
@@ -285,7 +291,7 @@ def main():
         st.session_state[SessionKey.SHOW_REFERENCE] = st.session_state[SessionKey.SHOW_REFERENCE_DEFAULT]
 
     # Main app
-    recognizer = MobileNetSitelenPonaRecognizer()
+    recognizer = create_recognizer()
 
     # Get all SVG files (strip _dark suffix for naming)
     svg_files = []
