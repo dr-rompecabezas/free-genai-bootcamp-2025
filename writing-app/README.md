@@ -142,6 +142,7 @@ The tests are also automatically run via GitHub Actions whenever changes are mad
 
 ## Project Structure
 
+```text
 writing-app/
 ├── app.py              # Main application using MobileNet approach
 ├── experiments/        # Previous experimental approaches
@@ -155,6 +156,7 @@ writing-app/
 ├── sitelen_pona_svgs_dark/ # White SVG files for dark mode
 ├── templates/        # Template images
 └── requirements.txt  # Python dependencies
+```
 
 ## Notes
 
@@ -345,9 +347,9 @@ Potential future approaches could include:
 
 ## Screenshots
 
-### Acceptable Solution Using MediaPipe with MobileNet
+### Final Solution Using OpenCV, MediaPipe, and the MobileNet Model
 
- -- add screenshots here in GitHub --
+<img width="1728" alt="writing-app-screenshot" src="https://github.com/user-attachments/assets/3a0a485d-9d09-4a7c-9caa-d801c7fdbaeb" />
 
 ### Unacceptable Solutions Using OpenCV and MediaPipe with EfficientNet
 
