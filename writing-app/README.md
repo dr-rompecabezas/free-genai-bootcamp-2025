@@ -10,6 +10,7 @@ A Streamlit-based web application for recognizing hand-drawn Sitelen Pona charac
 - [Technical Approach](#technical-approach)
 - [Requirements](#requirements)
 - [Setup and Running](#setup-and-running)
+- [Testing](#testing)
 - [Project Structure](#project-structure)
 - [Notes](#notes)
 - [License](#license)
@@ -42,7 +43,7 @@ A Streamlit-based web application for recognizing hand-drawn Sitelen Pona charac
 - Pre-processed template library included
 - Simple and intuitive user interface
 - Debug mode for visualizing intermediate steps and embeddings
-- Responsive design with light and dark modes
+- Comprehensive test suite for UI components and interactions
 
 ## Technical Approach
 
@@ -104,6 +105,38 @@ The app uses an image preprocessing pipeline that:
    ```
 
 The app will open in your default web browser. You can start drawing characters on the canvas and the app will attempt to recognize them in real-time. A dropdown menu will provide options for the two additional image input methods: file upload and webcam capture.
+
+## Testing
+
+The app includes a comprehensive test suite using pytest and Streamlit's testing API. The tests cover:
+
+- Basic app functionality (loading, title, tabs)
+- UI component interactions (buttons, sliders, toggles)
+- State management (session state, callbacks)
+- Mode switching and conditional UI elements
+- Debug features
+
+To run the tests locally:
+
+1. Activate your virtual environment:
+
+   ```bash
+   source .venv/bin/activate
+   ```
+
+2. Install test dependencies:
+
+   ```bash
+   pip install pytest
+   ```
+
+3. Run the tests:
+
+   ```bash
+   python -m pytest tests/test_app.py -v
+   ```
+
+The tests are also automatically run via GitHub Actions whenever changes are made to the `writing-app` directory.
 
 ## Project Structure
 
