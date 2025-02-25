@@ -1,5 +1,6 @@
 """Tests for the Sitelen Pona Writing Practice App."""
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 from streamlit.testing.v1 import AppTest
@@ -7,22 +8,36 @@ from streamlit.testing.v1 import AppTest
 from app import InputMode, SessionKey
 
 
+class MockRecognizer:
+    """Mock recognizer for testing."""
+    def __init__(self, *args, **kwargs):
+        self.templates = {}
+        self.embeddings = {}
+        self.embedder = MagicMock()
+
+    def recognize(self, *args, **kwargs):
+        """Mock recognize method."""
+        return "a", 0.8  # Always return 'a' with 0.8 confidence
+
+
 @pytest.fixture
 def app() -> AppTest:
     """Initialize the app for testing."""
-    at = AppTest.from_file("app.py")
-    
-    # Initialize session state
-    at.session_state[SessionKey.DEBUG_MODE] = False
-    at.session_state[SessionKey.THRESHOLD] = 0.7
-    at.session_state[SessionKey.SHOW_REFERENCE_DEFAULT] = True
-    at.session_state[SessionKey.SHOW_REFERENCE] = True
-    at.session_state[SessionKey.REFERENCE_BUTTON_KEY] = 0
-    at.session_state[SessionKey.WHITE_GLYPHS] = False
-    at.session_state[SessionKey.STROKE_THICKNESS] = 8
-    
-    at.run()
-    return at
+    # Mock the recognizer
+    with patch('app.MobileNetSitelenPonaRecognizer', MockRecognizer):
+        at = AppTest.from_file("app.py")
+        
+        # Initialize session state
+        at.session_state[SessionKey.DEBUG_MODE] = False
+        at.session_state[SessionKey.THRESHOLD] = 0.7
+        at.session_state[SessionKey.SHOW_REFERENCE_DEFAULT] = True
+        at.session_state[SessionKey.SHOW_REFERENCE] = True
+        at.session_state[SessionKey.REFERENCE_BUTTON_KEY] = 0
+        at.session_state[SessionKey.WHITE_GLYPHS] = False
+        at.session_state[SessionKey.STROKE_THICKNESS] = 8
+        
+        at.run()
+        return at
 
 
 def test_app_loads_without_error(app: AppTest):
