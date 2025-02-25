@@ -40,6 +40,7 @@ jobs:
       run: |
         echo "VIRTUAL_ENV=$PWD/.venv" >> $GITHUB_ENV
         echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
+        uv venv .venv  # Ensure the virtual environment is created
         source "$VIRTUAL_ENV/bin/activate"
         echo "Python binary: $(which python)"
         echo "Streamlit binary: $(which streamlit)"
