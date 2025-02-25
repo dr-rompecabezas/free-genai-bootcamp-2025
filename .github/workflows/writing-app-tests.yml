@@ -38,7 +38,7 @@ jobs:
 
     - name: Activate virtual environment
       run: |
-        echo "VIRTUAL_ENV=$(uv venv)" >> $GITHUB_ENV
+        echo "VIRTUAL_ENV=$PWD/.venv" >> $GITHUB_ENV
         echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
         source "$VIRTUAL_ENV/bin/activate"
         echo "Python binary: $(which python)"
