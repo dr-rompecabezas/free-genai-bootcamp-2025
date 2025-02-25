@@ -1146,17 +1146,23 @@ wheels = [
 [[package]]
 name = "sitelen-pona-ai"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "mediapipe" },
     { name = "numpy" },
     { name = "opencv-python" },
     { name = "pillow" },
-    { name = "pytest" },
     { name = "ruff" },
     { name = "streamlit" },
     { name = "streamlit-drawable-canvas" },
+]
+
+[package.optional-dependencies]
+dev = [
     { name = "watchdog" },
+]
+test = [
+    { name = "pytest" },
 ]
 
 [package.metadata]
@@ -1165,12 +1171,13 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.2.3" },
     { name = "opencv-python", specifier = ">=4.11.0.86" },
     { name = "pillow", specifier = ">=11.1.0" },
-    { name = "pytest", specifier = ">=8.3.4" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.3.4" },
     { name = "ruff", specifier = ">=0.9.7" },
     { name = "streamlit", specifier = ">=1.42.2" },
     { name = "streamlit-drawable-canvas", specifier = ">=0.9.3" },
-    { name = "watchdog", specifier = ">=6.0.0" },
+    { name = "watchdog", marker = "extra == 'dev'", specifier = ">=6.0.0" },
 ]
+provides-extras = ["test", "dev"]
 
 [[package]]
 name = "six"

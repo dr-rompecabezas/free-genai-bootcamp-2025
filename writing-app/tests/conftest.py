@@ -1,4 +1,5 @@
 """Test configuration and shared fixtures."""
+
 import os
 from pathlib import Path
 from typing import Generator
@@ -38,18 +39,20 @@ def sitelen_pona_svgs_dir(project_root: Path) -> Path:
 
 
 @pytest.fixture
-def app(app_path: Path, monkeypatch: pytest.MonkeyPatch) -> Generator[AppTest, None, None]:
+def app(
+    app_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> Generator[AppTest, None, None]:
     """Initialize the app for testing with proper working directory."""
     # Change to app directory so relative paths work
     original_dir = os.getcwd()
     os.chdir(app_path.parent)
-    
+
     # Initialize app
     at = AppTest.from_file(str(app_path))
     at.run()
-    
+
     yield at
-    
+
     # Restore original directory
     os.chdir(original_dir)
 
@@ -57,20 +60,18 @@ def app(app_path: Path, monkeypatch: pytest.MonkeyPatch) -> Generator[AppTest, N
 @pytest.fixture
 def mock_recognizer(monkeypatch: pytest.MonkeyPatch) -> None:
     """Mock the MobileNetSitelenPonaRecognizer to avoid loading real model."""
+
     class MockRecognizer:
         def __init__(self, *args, **kwargs):
             pass
-            
+
         def load_templates(self, *args, **kwargs):
             return {"test": [0.5] * 1280}
-            
+
         def process_image(self, *args, **kwargs):
             return [0.5] * 1280, []
-            
+
         def compare_embeddings(self, *args, **kwargs):
             return 0.75
-    
-    monkeypatch.setattr(
-        "app.MobileNetSitelenPonaRecognizer",
-        MockRecognizer
-    )
+
+    monkeypatch.setattr("app.MobileNetSitelenPonaRecognizer", MockRecognizer)
