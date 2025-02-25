@@ -1,3 +1,11 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["app"]  # This tells setuptools that app.py is a module
+package-dir = {"" = "."}  # Look for packages in the current directory
+
 [project]
 name = "sitelen-pona-ai"
 version = "0.1.0"
@@ -12,5 +20,16 @@ dependencies = [
     "ruff>=0.9.7",
     "streamlit>=1.42.2",
     "streamlit-drawable-canvas>=0.9.3",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.3.4",
+]
+dev = [
     "watchdog>=6.0.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

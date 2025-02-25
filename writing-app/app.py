@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 import random
-import urllib.request
 
 import cv2
 import mediapipe as mp
@@ -96,10 +95,11 @@ class MobileNetSitelenPonaRecognizer:
     def download_and_load_model(self, model_path):
         """Download and load the MobileNetV3 TFLite model using MediaPipe"""
         try:
-            # Download model if not already present
             if not Path(model_path).exists():
-                model_url = "https://storage.googleapis.com/mediapipe-assets/mobile_net_v3_small_224_224_quant.tflite"
-                urllib.request.urlretrieve(model_url, model_path)
+                raise FileNotFoundError(
+                    f"Model file not found at {model_path}. Please download the model manually from "
+                    "https://storage.googleapis.com/mediapipe-assets/mobile_net_v3_small_224_224_quant.tflite"
+                )
 
             # Create MediaPipe Image Embedder with proper options
             base_options = python.BaseOptions(model_asset_path=model_path)
@@ -248,7 +248,13 @@ class MobileNetSitelenPonaRecognizer:
         return None, best_score
 
 
+def create_recognizer():
+    """Create and return a MobileNetSitelenPonaRecognizer instance."""
+    return MobileNetSitelenPonaRecognizer()
+
+
 def main():
+    """Main function to run the Streamlit app"""
     st.title("Sitelen Pona Writing Practice")
 
     # Initialize session state for settings if not exists
@@ -259,7 +265,9 @@ def main():
     if SessionKey.SHOW_REFERENCE_DEFAULT not in st.session_state:
         st.session_state[SessionKey.SHOW_REFERENCE_DEFAULT] = True
     if SessionKey.SHOW_REFERENCE not in st.session_state:
-        st.session_state[SessionKey.SHOW_REFERENCE] = st.session_state[SessionKey.SHOW_REFERENCE_DEFAULT]
+        st.session_state[SessionKey.SHOW_REFERENCE] = st.session_state[
+            SessionKey.SHOW_REFERENCE_DEFAULT
+        ]
     if SessionKey.REFERENCE_BUTTON_KEY not in st.session_state:
         st.session_state[SessionKey.REFERENCE_BUTTON_KEY] = 0
     if SessionKey.SELECTED_CHAR not in st.session_state:
@@ -282,10 +290,12 @@ def main():
 
     def on_char_selection():
         # Reset reference visibility to default when character changes
-        st.session_state[SessionKey.SHOW_REFERENCE] = st.session_state[SessionKey.SHOW_REFERENCE_DEFAULT]
+        st.session_state[SessionKey.SHOW_REFERENCE] = st.session_state[
+            SessionKey.SHOW_REFERENCE_DEFAULT
+        ]
 
     # Main app
-    recognizer = MobileNetSitelenPonaRecognizer()
+    recognizer = create_recognizer()
 
     # Get all SVG files (strip _dark suffix for naming)
     svg_files = []
@@ -370,7 +380,7 @@ def main():
 
             # Practice settings
             st.subheader("Practice Settings")
-            
+
             # Reference toggle default
             st.session_state[SessionKey.SHOW_REFERENCE_DEFAULT] = st.toggle(
                 "Show Reference by Default",
@@ -429,8 +439,12 @@ def main():
                 canvas_result = st_canvas(
                     fill_color="rgba(255, 255, 255, 0.0)",
                     stroke_width=st.session_state[SessionKey.STROKE_THICKNESS],
-                    stroke_color="#000000" if not st.session_state[SessionKey.WHITE_GLYPHS] else "#FFFFFF",
-                    background_color="#FFFFFF" if not st.session_state[SessionKey.WHITE_GLYPHS] else "#000000",
+                    stroke_color="#000000"
+                    if not st.session_state[SessionKey.WHITE_GLYPHS]
+                    else "#FFFFFF",
+                    background_color="#FFFFFF"
+                    if not st.session_state[SessionKey.WHITE_GLYPHS]
+                    else "#000000",
                     width=224,
                     height=224,
                     drawing_mode="freedraw",
