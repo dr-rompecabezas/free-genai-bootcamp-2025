@@ -36,12 +36,10 @@ jobs:
         uv sync
         uv pip list  # Debugging step to check installed packages
 
-    - name: Activate virtual environment
+    - name: Set up virtual environment paths
       run: |
         echo "VIRTUAL_ENV=$PWD/.venv" >> $GITHUB_ENV
-        echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
-        uv venv .venv  # Ensure the virtual environment is created
-        source "$VIRTUAL_ENV/bin/activate"
+        echo "$PWD/.venv/bin" >> $GITHUB_PATH
         echo "Python binary: $(which python)"
         echo "Streamlit binary: $(which streamlit)"
         echo "Pytest binary: $(which pytest)"
@@ -59,8 +57,7 @@ jobs:
         STREAMLIT_SERVER_HEADLESS: true
         PYTHONPATH: ${{ github.workspace }}/writing-app
       run: |
-        source "$VIRTUAL_ENV/bin/activate"
-        streamlit run app.py &
+        .venv/bin/streamlit run app.py &
         sleep 3  # Allow time for Streamlit to initialize
 
     - name: Create models directory
@@ -68,8 +65,7 @@ jobs:
 
     - name: Run tests with Debug Logging
       run: |
-        source "$VIRTUAL_ENV/bin/activate"
-        pytest tests/test_app.py -v --log-cli-level=INFO
+        .venv/bin/pytest tests/test_app.py -v --log-cli-level=INFO
 
     - name: Run Streamlit App Action (Recommended)
       uses: streamlit/streamlit-app-action@v0.0.3
