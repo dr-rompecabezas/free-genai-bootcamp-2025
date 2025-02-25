@@ -32,7 +32,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-glx
+        sudo apt-get install -y libgl1 ffmpeg libsm6 libxext6
 
     - name: Run tests
       run: |
