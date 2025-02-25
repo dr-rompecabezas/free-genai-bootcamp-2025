@@ -4,16 +4,18 @@ on:
   push:
     paths:
       - 'writing-app/**'
+      - '.github/workflows/writing-app-tests.yml'
   pull_request:
     paths:
       - 'writing-app/**'
+      - '.github/workflows/writing-app-tests.yml'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: writing-app
+        working-directory: ./writing-app
 
     steps:
     - uses: actions/checkout@v4
@@ -38,6 +40,7 @@ jobs:
       run: |
         echo "VIRTUAL_ENV=$(uv venv)" >> $GITHUB_ENV
         echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
+        source "$VIRTUAL_ENV/bin/activate"
         echo "Python binary: $(which python)"
         echo "Streamlit binary: $(which streamlit)"
         echo "Pytest binary: $(which pytest)"
@@ -55,6 +58,7 @@ jobs:
         STREAMLIT_SERVER_HEADLESS: true
         PYTHONPATH: ${{ github.workspace }}/writing-app
       run: |
+        source "$VIRTUAL_ENV/bin/activate"
         streamlit run app.py &
         sleep 3  # Allow time for Streamlit to initialize
 
@@ -63,6 +67,7 @@ jobs:
 
     - name: Run tests with Debug Logging
       run: |
+        source "$VIRTUAL_ENV/bin/activate"
         pytest tests/test_app.py -v --log-cli-level=INFO
 
     - name: Run Streamlit App Action (Recommended)
