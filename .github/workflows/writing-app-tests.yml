@@ -24,18 +24,10 @@ jobs:
         python-version: '3.11'
         cache: 'pip'
 
-    - name: Install pip-tools
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install pip-tools
-
-    - name: Generate requirements.txt
-      run: pip-compile pyproject.toml
-
     - name: Install dependencies
       run: |
-        python -m pip install -r requirements.txt
-        python -m pip install pytest
+        python -m pip install --upgrade pip
+        python -m pip install .
 
     - name: Install system dependencies
       run: |
