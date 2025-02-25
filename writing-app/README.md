@@ -47,14 +47,23 @@ A Streamlit-based web application for recognizing hand-drawn Sitelen Pona charac
 - Debug mode for visualizing intermediate steps and embeddings
 - Comprehensive test suite for UI components and interactions
 
+<img width="1728" alt="writing-app-screenshot" src="https://github.com/user-attachments/assets/3a0a485d-9d09-4a7c-9caa-d801c7fdbaeb" />
+
 ## Technical Approach
 
-The app uses an image preprocessing pipeline that:
+Pre-Processing Pipeline:
 
-- Centers each character
-- Normalizes size to a standard dimension
-- Converts images to binary format
-- Compares drawn characters with a template library using multiple comparison methods
+1. Image Loading & Color Space: OpenCV (cv2)
+2. Resizing & Canvas Centering: OpenCV (cv2)
+3. Feature Extraction: MobileNetV3 (via MediaPipe Tasks)
+4. Embedding Comparison: NumPy (cosine similarity)
+
+Neural Network Details:
+
+* **Model**: MobileNetV3-Small (Quantized)
+* **Input Size**: 224x224 RGB
+* **Output**: 1x1024 L2-normalized embedding
+* **Framework**: MediaPipe Tasks Vision
 
 ## Requirements
 
@@ -345,13 +354,7 @@ Potential future approaches could include:
 - Using a pre-trained handwriting recognition model fine-tuned for Sitelen Pona
 - Developing custom shape descriptors that better capture the essential features of each character
 
-## Screenshots
-
-### Final Solution Using OpenCV, MediaPipe, and the MobileNet Model
-
-<img width="1728" alt="writing-app-screenshot" src="https://github.com/user-attachments/assets/3a0a485d-9d09-4a7c-9caa-d801c7fdbaeb" />
-
-### Unacceptable Solutions Using OpenCV and MediaPipe with EfficientNet
+## Screenshots of Failed Experiments Using OpenCV and MediaPipe with EfficientNet
 
 Image depicting the debugging of the feature-matching attempt with the OpenCV ORB strategy using sliders to tweak the model's parameters:
 
