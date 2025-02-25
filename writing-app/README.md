@@ -9,10 +9,12 @@ A Streamlit-based web application for recognizing hand-drawn Sitelen Pona charac
 ## Table of Contents
 
 - [Features](#features)
-- [Technical Approach](#technical-approach)
 - [Requirements](#requirements)
 - [Setup and Running](#setup-and-running)
+  - [Option 1: Using Docker (Recommended)](#option-1-using-docker-recommended)
+  - [Option 2: Local Setup](#option-2-local-setup)
 - [Testing](#testing)
+- [Technical Approach](#technical-approach)
 - [Project Structure](#project-structure)
 - [Notes](#notes)
 - [License](#license)
@@ -28,9 +30,7 @@ A Streamlit-based web application for recognizing hand-drawn Sitelen Pona charac
   - [4. MediaPipe with EfficientNet (`mediapipe.app.py`)](#4-mediapipe-with-efficientnet-mediapipeapppy)
     - [Results and Limitations](#results-and-limitations)
 - [Conclusions and Future Directions](#conclusions-and-future-directions)
-- [Screenshots](#screenshots)
-  - [Acceptable Solution Using MediaPipe with MobileNet](#acceptable-solution-using-mediapipe-with-mobilenet)
-  - [Unacceptable Solutions Using OpenCV and MediaPipe with EfficientNet](#unacceptable-solutions-using-opencv-and-mediapipe-with-efficientnet)
+- [Screenshots of Failed Experiments Using OpenCV and MediaPipe with EfficientNet](#screenshots-of-failed-experiments-using-opencv-and-mediapipe-with-efficientnet)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -49,28 +49,35 @@ A Streamlit-based web application for recognizing hand-drawn Sitelen Pona charac
 
 <img width="1728" alt="writing-app-screenshot" src="https://github.com/user-attachments/assets/3a0a485d-9d09-4a7c-9caa-d801c7fdbaeb" />
 
-## Technical Approach
-
-Pre-Processing Pipeline:
-
-1. Image Loading & Color Space: OpenCV (cv2)
-2. Resizing & Canvas Centering: OpenCV (cv2)
-3. Feature Extraction: MobileNetV3 (via MediaPipe Tasks)
-4. Embedding Comparison: NumPy (cosine similarity)
-
-Neural Network Details:
-
-* **Model**: MobileNetV3-Small (Quantized)
-* **Input Size**: 224x224 RGB
-* **Output**: 1x1024 L2-normalized embedding
-* **Framework**: MediaPipe Tasks Vision
-
 ## Requirements
 
-- Python 3.11 or higher
+- Python 3.11 (recommended)
 - Dependencies listed in `pyproject.toml`
 
 ## Setup and Running
+
+### Option 1: Using Docker (Recommended)
+
+The easiest way to run the application is using Docker:
+
+1. Build the Docker image:
+   ```bash
+   docker build -t writing-app .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -p 8501:8501 writing-app
+   ```
+
+3. Open your browser and navigate to:
+   ```
+   http://localhost:8501
+   ```
+
+The Docker container will automatically download any required models on first run.
+
+### Option 2: Local Setup
 
 1. Create and activate a Python virtual environment:
 
@@ -148,6 +155,22 @@ To run the tests locally:
    ```
 
 The tests are also automatically run via GitHub Actions whenever changes are made to the `writing-app` directory.
+
+## Technical Approach
+
+Pre-Processing Pipeline:
+
+1. Image Loading & Color Space: OpenCV (cv2)
+2. Resizing & Canvas Centering: OpenCV (cv2)
+3. Feature Extraction: MobileNetV3 (via MediaPipe Tasks)
+4. Embedding Comparison: NumPy (cosine similarity)
+
+Neural Network Details:
+
+* **Model**: MobileNetV3-Small (Quantized)
+* **Input Size**: 224x224 RGB
+* **Output**: 1x1024 L2-normalized embedding
+* **Framework**: MediaPipe Tasks Vision
 
 ## Project Structure
 
