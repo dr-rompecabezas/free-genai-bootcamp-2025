@@ -8,6 +8,7 @@ This repository contains assignments completed during ExamPro's free GenAI Bootc
 
 - [🎨 `/writing-app` directory](#-writing-app-directory)
 - [🎧 `/listening-app` directory](#-listening-app-directory)
+- [✌️ `/signing-app` directory](#signing-app-directory)
 - [🪢 `/lang-portal` directory](#-lang-portal-directory)
 - [🧭 `/genai-architecting` directory](#-genai-architecting-directory)
 - [🔭 `/sentence-constructor` directory](#-sentence-constructor-directory)
@@ -39,6 +40,18 @@ The `listening-app` directory contains a Streamlit-based application featuring:
 - Utility tool for processing YouTube transcripts to support NLP tasks
 
 The application demonstrates practical use of Large Language Models (GPT) and Text-to-Speech technology in language education.
+
+## ✌️ `/signing-app` directory
+
+The `/signing-app` directory contains the Luka Pona Signing Learning App, a prototype application that helps users learn sign language through computer vision and machine learning. Key features include:
+
+- Real-time hand tracking and landmark detection using MediaPipe
+- Dynamic Time Warping (DTW) for comparing learner signs with templates
+- Detailed feedback with similarity scores and areas for improvement
+- Visual analysis tools including side-by-side comparisons and heatmaps
+- GIF-based recording and playback for sign comparisons
+
+The application demonstrates practical use of computer vision and gesture recognition in language education, with an emphasis on providing meaningful feedback to learners.
 
 ## 🪢 `/lang-portal` directory
 
