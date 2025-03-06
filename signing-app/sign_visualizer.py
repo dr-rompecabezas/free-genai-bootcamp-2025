@@ -205,7 +205,7 @@ if __name__ == "__main__":
     visualizer = SignVisualizer()
     
     template_gif = "animated_gifs/example/template_sign.gif"
-    learner_gif = "animated_gifs/example/learner_attempt.gif"
+    learner_gif = "animated_gifs/example/learner_sign.gif"
     
     # Display individual sign with landmarks
     print("Processing template sign...")
