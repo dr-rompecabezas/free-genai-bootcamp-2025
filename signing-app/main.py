@@ -191,7 +191,7 @@ if __name__ == "__main__":
     comparer = SignComparer()
     
     template_gif = "animated_gifs/example/template_sign.gif"
-    learner_gif = "animated_gifs/example/learner_attempt.gif"
+    learner_gif = "animated_gifs/example/learner_sign.gif"
     
     comparison = comparer.compare_signs(template_gif, learner_gif)
     feedback = comparer.generate_feedback(comparison)
