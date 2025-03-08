@@ -8,8 +8,9 @@ This repository contains assignments completed during ExamPro's free GenAI Bootc
 
 - [🎨 `/writing-app` directory](#-writing-app-directory)
 - [🎧 `/listening-app` directory](#-listening-app-directory)
-- [✌️ `/signing-app` directory](#signing-app-directory)
+- [✌️ `/signing-app` directory](#-signing-app-directory)
 - [🪢 `/lang-portal` directory](#-lang-portal-directory)
+- [🔮 `/opea-comps` directory](#-opea-comps-directory)
 - [🧭 `/genai-architecting` directory](#-genai-architecting-directory)
 - [🔭 `/sentence-constructor` directory](#-sentence-constructor-directory)
 - [🧪 `/dev-tools` directory](#-dev-tools-directory)
@@ -67,6 +68,23 @@ git checkout -b fastapi-vue-final
 ```
 
 The first migration experience was documented in the `/dev-tools` directory as a homework assignment. The second, current rebuild was documented in the detailed git commit messages.
+
+## 🔮 `/opea-comps` directory
+
+The `/opea-comps` directory contains experiments with the OPEA (Open Enterprise AI) ChatQnA Megaservice. The project documents two deployment attempts:
+
+- Mac M1 Chip adaptation with platform emulation for x86 containers
+- AWS EC2 deployment on an m7i.4xlarge instance with Intel Xeon processor
+
+Key implementation details include:
+
+- Docker configuration adaptations for ARM architecture compatibility
+- Environment variable setup and networking configuration
+- Model selection optimized for hardware constraints
+- Microservices setup including embedding, retrieval, and LLM components
+- Troubleshooting solutions for common deployment issues
+
+The project demonstrates the challenges and solutions involved in deploying complex GenAI microservice architectures across different computing environments, with detailed documentation of both successes and limitations.
 
 ## 🧭 `/genai-architecting` directory
 
