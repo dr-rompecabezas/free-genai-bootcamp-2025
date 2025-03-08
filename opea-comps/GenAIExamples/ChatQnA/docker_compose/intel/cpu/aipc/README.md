@@ -2,9 +2,17 @@
 
 This document outlines the deployment process for a ChatQnA application utilizing the [GenAIComps](https://github.com/opea-project/GenAIComps.git) microservice pipeline on AIPC. The steps include Docker image creation, container deployment via Docker Compose, and service execution to integrate microservices such as `embedding`, `retriever`, `rerank`, and `llm`.
 
-> **Note for Mac with ARM architecture (Apple Silicon)**: This project has been adapted to run on Mac ARM architecture by using emulation for x86 containers. The `compose.yaml` includes the `platform: linux/amd64` setting for each service to ensure compatibility. The `set_env.sh` script has also been updated to work with macOS. Follow the standard instructions below, with Mac-specific notes highlighted where relevant.
+> **Note for Mac with ARM architecture (Apple Silicon)**: This project can be run on Mac ARM architecture with some limitations. We've adapted the configuration to use emulation for x86 containers by adding `platform: linux/amd64` to each service. However, be aware of the following challenges:
+>
+> 1. **Limited Memory**: Large LLM models may not run due to memory constraints in emulation
+> 2. **AVX Instruction Compatibility**: The retriever service uses libraries (JAX) that require AVX instructions, which aren't available in ARM emulation
+> 3. **Performance Impact**: Services running through emulation will be slower than on native architecture
+>
+> The current adaptation enables basic chat functionality with a small LLM model (TinyLLama) but without RAG retrieval capabilities. For a fully functional setup, users should either use x86 hardware or build ARM-native versions of the services.
+>
+> Follow the standard instructions below, with Mac-specific notes highlighted where relevant.
 
-## Quick Start:
+## Quick Start
 
 1. Set up the environment variables.
 2. Run Docker Compose.
@@ -65,7 +73,7 @@ NB: You should build docker image from source by yourself if:
 - You can't download the docker image.
 - You want to use a specific version of Docker image.
 
-Please refer to ['Build Docker Images'](#🚀-build-docker-images) in below.
+Please refer to [Build Docker Images](## 🚀-build-docker-images) in below.
 
 ### Quick Start:3. Consume the ChatQnA Service
 
@@ -156,23 +164,38 @@ Since the `compose.yaml` will consume some environment variables, you need to se
 
 > Change the External_Public_IP below with the actual IPV4 value
 
-```
+```bash
 export host_ip="External_Public_IP"
 ```
 
 For Linux users, please run `hostname -I | awk '{print $1}'`. For Windows users, please run `ipconfig | findstr /i "IPv4"` to get the external public ip. For Mac users, the updated `set_env.sh` script will automatically detect your IP address or use `host.docker.internal` as fallback.
 
+### Mac ARM Architecture Special Considerations
+
+If you're running on Mac with ARM architecture (Apple Silicon), consider these additional steps:
+
+1. **Port conflicts**: If you encounter port conflicts (especially with port 7000), modify the port mappings in `compose.yaml`.
+
+2. **Model selection**: Use smaller models for the LLM service:
+
+   ```bash
+   # In set_env.sh, change to a smaller model
+   export OLLAMA_MODEL="tinyllama" 
+   ```
+
+3. **Retriever limitations**: The retriever service will likely fail due to AVX instruction dependencies. The system can still function in basic chat mode without RAG capabilities.
+
 **Export the value of your Huggingface API token to the `HUGGINGFACEHUB_API_TOKEN` environment variable**
 
 > Change the Your_Huggingface_API_Token below with tyour actual Huggingface API Token value
 
-```
+```bash
 export HUGGINGFACEHUB_API_TOKEN="Your_Huggingface_API_Token"
 ```
 
-**Append the value of the public IP address to the no_proxy list if you are in a proxy environment**
+Append the value of the public IP address to the no_proxy list if you are in a proxy environment
 
-```
+```bash
 export your_no_proxy=${your_no_proxy},"External_Public_IP",chatqna-aipc-backend-server,tei-embedding-service,retriever,tei-reranking-service,redis-vector-db,dataprep-redis-service,ollama-service
 ```
 
