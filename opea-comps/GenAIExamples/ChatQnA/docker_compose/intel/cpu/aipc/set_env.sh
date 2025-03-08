@@ -39,7 +39,7 @@ export EMBEDDING_MODEL_ID="BAAI/bge-base-en-v1.5"
 export RERANK_MODEL_ID="BAAI/bge-reranker-base"
 export INDEX_NAME="rag-redis"
 export OLLAMA_HOST=${host_ip}
-export OLLAMA_MODEL="phi3:mini"
+export OLLAMA_MODEL="tinyllama"
 # Set it as a non-null string, such as true, if you want to enable logging facility,
 # otherwise, keep it as "" to disable it.
 export LOGFLAG=""
