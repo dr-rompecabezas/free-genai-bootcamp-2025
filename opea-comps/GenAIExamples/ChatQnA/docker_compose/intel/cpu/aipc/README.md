@@ -12,6 +12,9 @@ This document outlines the deployment process for a ChatQnA application utilizin
 >
 > Follow the standard instructions below, with Mac-specific notes highlighted where relevant.
 
+
+<img width="1728" alt="image" src="https://github.com/user-attachments/assets/2aff522e-f418-40bf-9fce-918eaefcfe0e" />
+
 ## Quick Start
 
 1. Set up the environment variables.
