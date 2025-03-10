@@ -1,6 +1,10 @@
 # Toki Pona Learning Assistant
 
-An AI-powered learning assistant that helps users learn Toki Pona through YouTube videos. This application uses Claude, YouTube's Data API, and transcript analysis to create an interactive learning experience.
+An AI-powered learning assistant that helps users learn Toki Pona through YouTube videos. This application uses Claude, YouTube's Data API, and transcript analysis to create an interactive learning experience. 
+
+## 🎥 Demo Video
+
+[![Toki Pona Learning Assistant Demo](https://img.youtube.com/vi/xC_Jz2w1TTM/0.jpg)](https://youtu.be/xC_Jz2w1TTM)
 
 ## 🌟 Features
 
@@ -23,17 +27,24 @@ An AI-powered learning assistant that helps users learn Toki Pona through YouTub
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/toki-pona-assistant.git
-   cd toki-pona-assistant
+   git clone https://github.com/dr-rompecabezas/free-genai-bootcamp-2025
+   cd free-genai-bootcamp-2025/agentic-workflow
    ```
 
-2. Install dependencies:
+2. Create a virtual environment:
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   ```
+
+3. Install dependencies:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Set up environment variables:
+4. Set up environment variables:
 
    ```bash
    cp .env.template .env
@@ -88,7 +99,45 @@ python main.py
 
 ## 🔍 How It Works
 
-The application follows a structured workflow:
+The application follows a semi-structured workflow:
+
+```mermaid
+sequenceDiagram
+    participant Student
+    participant Assistant
+    participant YouTube
+    participant Transcripts
+    participant Learning Tools
+
+    Student->>Assistant: Ask about Toki Pona topic
+    Assistant->>YouTube: Search for relevant videos
+    YouTube-->>Assistant: Video search results
+    
+    Assistant->>Student: Present curated video options
+    Student->>Assistant: Select a video
+    
+    Assistant->>YouTube: Retrieve video content
+    YouTube-->>Assistant: Video metadata
+    
+    Assistant->>Transcripts: Obtain/generate transcript
+    Note over Transcripts: Uses tiered approach<br/>(API → Speech Recognition → AI)
+    Transcripts-->>Assistant: Processed transcript
+    
+    Assistant->>Learning Tools: Extract vocabulary
+    Learning Tools-->>Assistant: Vocabulary list with definitions
+    
+    Assistant->>Student: Video summary & learning options
+    
+    rect rgb(240, 240, 240)
+    Note right of Student: Learning Activities
+    Student->>Assistant: Request transcript review
+    Student->>Assistant: Study vocabulary
+    Student->>Assistant: Take generated quiz
+    end
+    
+    Student->>Assistant: Request new topic
+    Note over Student,Assistant: Learning cycle continues
+```
 
 1. The user requests learning content
 2. The assistant searches YouTube for relevant videos
@@ -123,6 +172,16 @@ toki-pona-assistant/
 
 ## ✨ Learning Features
 
+### Transcript Generation
+
+The assistant uses a tiered approach to ensure transcripts are available for all videos:
+
+1. **Official Transcripts**: First attempts to retrieve official YouTube transcripts
+2. **Speech Recognition**: If no transcript exists, downloads audio and converts to text
+3. **AI Generation**: As a last resort, generates educational content based on video metadata
+
+All generated transcripts are clearly marked so users know their source.
+
 ### Vocabulary Extraction
 
 The assistant automatically identifies Toki Pona words in video transcripts and provides:
@@ -138,10 +197,6 @@ Generates quizzes at three difficulty levels:
 - **Beginner**: Basic vocabulary and simple sentence structure
 - **Intermediate**: Translations and fill-in-the-blank exercises
 - **Advanced**: Complex sentences, idioms, and original sentence creation
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📜 License
 
