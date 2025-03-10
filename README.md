@@ -6,6 +6,7 @@ This repository contains assignments completed during ExamPro's free GenAI Bootc
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 ## Directory Structure
 
+- [🤖 `/agentic-workflow` directory](#-agentic-workflow-directory)
 - [🎨 `/writing-app` directory](#-writing-app-directory)
 - [🎧 `/listening-app` directory](#-listening-app-directory)
 - [✌️ `/signing-app` directory](#-signing-app-directory)
@@ -16,6 +17,17 @@ This repository contains assignments completed during ExamPro's free GenAI Bootc
 - [🧪 `/dev-tools` directory](#-dev-tools-directory)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## 🤖 `/agentic-workflow` directory
+
+The `/agentic-workflow` directory contains a Toki Pona Learning Assistant that leverages AI to create an interactive language learning experience. Key features include:
+
+- **Video-Based Learning**: Integration with YouTube's Data API to discover and analyze Toki Pona learning content
+- **AI-Powered Analysis**: Uses Claude to process video transcripts, extract vocabulary, and generate customized quizzes
+- **Interactive Learning Flow**: Structured workflow for video selection, content study, and knowledge testing at multiple difficulty levels
+
+The application demonstrates practical use of modern AI technologies (Claude, YouTube APIs) for creating an engaging language learning experience, with emphasis on vocabulary extraction and adaptive quiz generation.
+
 ## 🎨 `/writing-app` directory
 
 The `/writing-app` directory contains a Streamlit-based character recognition application for Sitelen Pona (Toki Pona's writing system). Key features include:
