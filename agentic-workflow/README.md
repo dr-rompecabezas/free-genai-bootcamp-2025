@@ -1,153 +1,158 @@
-# Agentic Workflow
+# Toki Pona Learning Assistant
 
-This agent helps students learn Toki Pona (a minimalist constructed language) through YouTube videos by providing search, transcription, summarization, vocabulary extraction, and quiz functionalities. It features:
+An AI-powered learning assistant that helps users learn Toki Pona through YouTube videos. This application uses Claude, YouTube's Data API, and transcript analysis to create an interactive learning experience.
 
-- function calling (e.g., data fetching, taking actions)
-- structured outputs (e.g., JSON schema, Pydantic models)
-- state management (e.g., finite state machines)
-- user interfaces (e.g., command-line interfaces)
+## 🌟 Features
 
-This is a work in progress.
+- **Video Discovery**: Search for Toki Pona learning videos on YouTube
+- **Content Analysis**: Automatically extract transcripts and analyze content
+- **Vocabulary Extraction**: Identify and define Toki Pona words from videos
+- **Interactive Quizzes**: Generate customized quizzes based on video content
+- **Guided Learning Flow**: Follow a structured learning workflow
+- **Conversational Interface**: Natural language interaction with the assistant
 
-## Setup
+## 📋 Prerequisites
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -e .
-```
+- Python 3.8+
+- Anthropic API key (for Claude)
+- YouTube Data API key
+- Internet connection for API access
 
-## Usage
+## 🚀 Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/yourusername/toki-pona-assistant.git
+   cd toki-pona-assistant
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Set up environment variables:
+
+   ```bash
+   cp .env.template .env
+   ```
+
+   Then edit the `.env` file to add your API keys:
+
+   ```text
+   ANTHROPIC_API_KEY=your_anthropic_api_key_here
+   YOUTUBE_API_KEY=your_youtube_api_key_here
+   ```
+
+## 💻 Usage
+
+Start the application:
 
 ```bash
 python main.py
 ```
 
-## Key Components
+### Learning Flow
 
-1. Video Search & Selection
+1. **Search for Videos**: Ask the assistant about specific Toki Pona topics
 
-    - Searches YouTube for Toki Pona lessons
-    - Offers recommendations and alternatives
-    - Falls back to pre-selected videos if needed
+   ```text
+   "I want to learn about Toki Pona numbers"
+   ```
 
-2. Content Processing
+2. **Select a Video**: Choose from suggested videos
 
-    - Retrieves or generates transcripts
-    - Summarizes video content
-    - Extracts key vocabulary and phrases
+   ```text
+   "Let's watch the second video"
+   ```
 
-3. Learning Assessment
+3. **Study Content**: The assistant will process the video and offer options
 
-    - Creates quizzes based on video content
-    - Provides feedback on student responses
-    - Adjusts difficulty based on performance
+   ```text
+   "Show me the vocabulary from this video"
+   ```
 
-4. Navigation Controls
+4. **Take Quizzes**: Test your knowledge
 
-    - Gives students clear options at each step
-    - Always provides an option to exit current activity
-    - Avoids loops by limiting recommendation cycles
+   ```text
+   "Generate a beginner quiz about this lesson"
+   ```
 
-## Flowchart
+5. **Continue Learning**: Move to another topic or video
 
-```mermaid
-flowchart TD
-    Start([Start]) --> Search[Search YouTube for\nToki Pona lesson]
-    
-    Search --> Found{Video found?}
-    Found -->|Yes| Offer[Offer video to student]
-    Found -->|No| Default[Suggest video from\npre-selected defaults]
-    Default --> Offer
-    
-    Offer --> Accept{Student accepts?}
-    Accept -->|Yes| Process[Process video content]
-    Accept -->|No| SuggestMore{Suggestion\nlimit reached?}
-    SuggestMore -->|No| Search
-    SuggestMore -->|Yes| Default
-    
-    Process --> CheckCache{Video in\ncache/storage?}
-    CheckCache -->|Yes| NextAction
-    CheckCache -->|No| CheckSubtitles{Has subtitles\nor transcript?}
-    
-    CheckSubtitles -->|Yes| UseExisting[Use existing\ntranscript]
-    CheckSubtitles -->|No| Transcribe[Transcribe video]
-    
-    UseExisting --> Extract[Extract summary\nand vocabulary]
-    Transcribe --> Extract
-    
-    Extract --> NextAction{What next?}
-    
-    NextAction -->|Review transcript| ShowTranscript[Display transcript]
-    NextAction -->|Study vocabulary| ShowVocab[Display vocabulary list]
-    NextAction -->|Take quiz| GenerateQuiz[Generate quiz]
-    NextAction -->|New video| Search
-    NextAction -->|Exit| End([End])
-    
-    ShowTranscript --> ActionComplete
-    ShowVocab --> ActionComplete
-    
-    GenerateQuiz --> DeliverQuiz[Deliver quiz questions]
-    DeliverQuiz --> GradeFeedback[Grade and provide feedback]
-    GradeFeedback --> ActionComplete
-    
-    ActionComplete[Action complete] --> NextAction
+   ```text
+   "I want to learn about particles next"
+   ```
+
+## 🔍 How It Works
+
+The application follows a structured workflow:
+
+1. The user requests learning content
+2. The assistant searches YouTube for relevant videos
+3. After selecting a video, the assistant:
+   - Retrieves the video transcript
+   - Extracts Toki Pona vocabulary
+   - Creates a learning summary
+4. The user can:
+   - Review the transcript
+   - Study extracted vocabulary
+   - Take generated quizzes
+   - Request new videos
+
+## 📁 Project Structure
+
+```text
+toki-pona-assistant/
+├── main.py              # Main application file
+├── youtube_functions.py # YouTube API integration
+├── requirements.txt     # Dependencies
+├── .env.template        # Environment variable template
+└── README.md            # This file
 ```
 
-## Implementation Considerations
+## 🛠️ Technologies Used
 
-1. System Architecture
+- **Anthropic Claude**: Powers the conversational AI assistant
+- **YouTube Data API**: Searches and retrieves video information
+- **YouTube Transcript API**: Extracts video transcripts
+- **Python**: Core programming language
+- **AsyncIO**: Handles asynchronous operations
 
-    - Command-Line Interface (CLI): Create a text-based interface that's easy to navigate with simple commands.
-    - Modular Design: Separate functionality into modules (search, processing, quiz) for easier maintenance.
-    - State Management: Track user progress and history across sessions.
+## ✨ Learning Features
 
-2. Key Technical Components
+### Vocabulary Extraction
 
-    - YouTube API Integration: For searching videos and retrieving metadata.
-    - Speech-to-Text: For transcribing videos that lack subtitles.
-    - Natural Language Processing: For summarization and vocabulary extraction.
-    - Database: To cache transcripts and vocabulary to avoid redundant processing.
+The assistant automatically identifies Toki Pona words in video transcripts and provides:
 
-3. User Experience Considerations
+- Word definitions
+- Example usage from the video
+- Context for deeper understanding
 
-    - Progressive Disclosure: Start simple and reveal more advanced options as the student progresses.
-    - Clear Navigation: Always show available options and how to access them.
-    - Feedback Loop: Gather student feedback on video quality and quiz difficulty.
+### Quiz Generation
 
-4. Enhancement Ideas
+Generates quizzes at three difficulty levels:
 
-    - Difficulty Levels: Tag videos and quizzes with beginner/intermediate/advanced ratings.
-    - Spaced Repetition: Schedule review of previously learned vocabulary.
-    - Learning Path: Suggest logical progression of videos based on content.
-    - Translation Practice: Incorporate translation exercises in both directions.
+- **Beginner**: Basic vocabulary and simple sentence structure
+- **Intermediate**: Translations and fill-in-the-blank exercises
+- **Advanced**: Complex sentences, idioms, and original sentence creation
 
-5. Potential Challenges
+## 🤝 Contributing
 
-    - YouTube API Limitations: Managing rate limits and content restrictions.
-    - Transcription Accuracy: Ensuring quality for videos with poor audio.
-    - Content Availability: Finding enough high-quality Toki Pona videos.
-    - Quiz Generation: Creating meaningful assessments from video content.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Prototype Plan
+## 📜 License
 
-### Implementation Notes for Prototyping
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-1. Start with Mock Data: Using hardcoded responses for YouTube searches and transcripts speeds up initial testing.
-2. Minimal Dependencies: For quick prototyping, minimize external dependencies.
-3. Simple Session Storage: Use in-memory storage initially rather than databases.
-4. Progressive Enhancement:
-    - First test with mock functions
-    - Then integrate real YouTube API
-    - Finally add transcript processing
+## 🙏 Acknowledgments
 
-### Fastest Path to Proof of Concept
+- Thanks to the Toki Pona community for creating learning resources
+- Anthropic for Claude API
+- YouTube for providing access to educational content
 
-The command-line approach is the quickest way to prove the concept. The process would be:
+## 📚 About Toki Pona
 
-1. Implement the CLI prototype with mock functions
-2. Test various conversation flows
-3. Replace mock functions with real API implementations once the flow works
-4. Gather feedback and iterate
-
-With this approach, we could have a working prototype in a day or two, allowing us to validate the concept before investing in a full UI implementation.
+Toki Pona is a minimalist constructed language created by linguist Sonja Lang. It has around 120-130 words and uses simple grammatical structures, making it an interesting language to learn and study.
