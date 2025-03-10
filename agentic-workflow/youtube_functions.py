@@ -82,6 +82,9 @@ def search_youtube_videos(query):
             formatted_duration = "Unknown"
             view_count = "Unknown"
             
+        # Build the full YouTube URL
+        video_url = f"https://www.youtube.com/watch?v={video_id}"
+            
         # Format the result
         results.append({
             "id": video_id,
@@ -91,7 +94,8 @@ def search_youtube_videos(query):
             "description": item["snippet"]["description"],
             "published_at": item["snippet"]["publishedAt"],
             "thumbnail": item["snippet"]["thumbnails"]["high"]["url"],
-            "view_count": view_count
+            "view_count": view_count,
+            "url": video_url  # Add the full URL
         })
     
     return results
@@ -416,6 +420,9 @@ def get_video_content(video_id):
         video_data = video_response["items"][0]
         snippet = video_data["snippet"]
         
+        # Build the full YouTube URL
+        video_url = f"https://www.youtube.com/watch?v={video_id}"
+        
         # Get transcript data using the YouTube API
         transcript_data = get_video_transcript(video_id)
         
@@ -461,7 +468,9 @@ def get_video_content(video_id):
             "transcript_language": transcript_data["language"],
             "transcript": transcript_data["transcript"],
             "transcript_source": transcript_data["source"],
-            "is_generated_transcript": transcript_data["is_generated"]
+            "is_generated_transcript": transcript_data["is_generated"],
+            "url": video_url,  # Add the full URL
+            "video_id": video_id  # Include the video ID for easy reference
         }
         
         return video_content

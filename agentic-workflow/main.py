@@ -265,11 +265,39 @@ async def chat_with_toki_pona_assistant(user_message, session):
     session.add_user_message(user_message)
     
     # Include current context in system prompt
-    context = "You are a helpful Toki Pona learning assistant that guides students through learning Toki Pona using YouTube videos."
+    context = """You are a helpful Toki Pona learning assistant that guides students through learning Toki Pona using YouTube videos.
+
+When presenting video search results to the student:
+1. Include the full YouTube URL for each video
+2. Format results in a numbered list for easy selection
+3. Include title, channel, duration, and view count
+
+When a student selects a video, always provide them with the direct link to watch it on YouTube.
+"""
+    
+    # Add search results context if available
+    if session.search_results and len(session.search_results) > 0:
+        context += "\n\nRecent search results:"
+        for i, video in enumerate(session.search_results[:3], 1):
+            context += f"\n{i}. {video.get('title')} by {video.get('channel')} ({video.get('duration')}) - {video.get('url')}"
     
     # Add video context if available
     if session.current_content:
+        video_url = session.current_content.get('url', '')
         video_context = f"\nCurrent video: {session.current_content.get('title', 'Unknown')} by {session.current_content.get('channel', 'Unknown')}"
+        
+        if video_url:
+            video_context += f"\nVideo URL: {video_url}"
+        
+        # Add transcript source information
+        if session.current_content.get('is_generated_transcript', False):
+            source = session.current_content.get('transcript_source', 'unknown')
+            if source == 'speech_recognition':
+                video_context += "\n[Transcript was automatically generated from audio using speech recognition]"
+            elif source == 'anthropic':
+                video_context += "\n[Transcript was generated based on video title and description]"
+            else:
+                video_context += "\n[Transcript was automatically generated]"
         
         # Only include transcript if it's not too long
         transcript = session.current_content.get('transcript', '')
