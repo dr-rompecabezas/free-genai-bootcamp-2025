@@ -1,6 +1,6 @@
 # GenAI Bootcamp 2025: Toki Pona AI-Enhanced Language Learning Experiments
 
-This repository contains assignments completed during ExamPro's free GenAI Bootcamp. The final project is hosted at <https://github.com/think-elearn/toki-pona-ai>.
+This repository contains assignments completed during ExamPro's free GenAI Bootcamp. The final project is hosted at <https://github.com/dr-rompecabezas/toki-pona-ai>.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
